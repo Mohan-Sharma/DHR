@@ -1,0 +1,171 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/layout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <style src="/css/mainCSS.css"/>
+    <zscript>
+        pagetitle.setValue("Digitized Health Records -- DHR");
+        subpagetitle.setValue("Enter Patient Information");
+    </zscript>
+    <window id="registerPatientWin" self="@{define(content)}"
+            apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('patientViewModel') @init('com.patientadmission.presentation.PatientViewModel')" width="98%">
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;" align="center">
+                Register Patient
+            </n:h3>
+        </div>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="MR Number" style="font-weight:bold" hflex="1"/><label value="*" style="color:#ff0000"/>
+                    <textbox sclass="span12"
+                             value="@save(patientViewModel.registerPatientCommand.medicalRecordNumber,before={'findPatient','registerPatient'}) @load(patientViewModel.registerPatientCommand.medicalRecordNumber)"
+                             width="100%" constraint="no empty:*Required"
+                             onBlur="@command('findPatient',button=viewPatientDetalsBtn)"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Title" style="font-weight:bold"/>
+                    <combobox  model="@bind(patientViewModel.titles)"
+                              readonly="true"
+                              selectedItem="@load(patientViewModel.selectedTitle) @save(patientViewModel.selectedTitle,before='selectTitle')"
+                              onSelect="@command('selectTitle')">
+                        <template name="model" var="title">
+                            <comboitem label="@load(title.description)" value="@bind(title.enumCode)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span1"/>
+                <div zclass="span3">
+                    <label value="First Name" style="font-weight:bold"/>
+                    <textbox sclass="span12" value="@bind(patientViewModel.registerPatientCommand.firstName)"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Middle Name" style="font-weight:bold"/>
+                    <textbox sclass="span12" value="@bind(patientViewModel.registerPatientCommand.middleName)"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Last Name" style="font-weight:bold"/>
+                    <textbox sclass="span12" value="@bind(patientViewModel.registerPatientCommand.lastName)"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Gender" style="font-weight:bold"/>
+                    <textbox value="@bind(patientViewModel.gender)" disabled="true"/>
+                </div>
+                <div zclass="span1"/>
+                <div zclass="span3">
+                    <label value="Contact Number" style="font-weight:bold"/>
+                    <textbox sclass="span12" value="@bind(patientViewModel.registerPatientCommand.phoneNumber)"/>
+                </div>
+                <div zclass="span2">
+                    <label value="DOB" style="font-weight:bold"/>
+                    <datebox sclass="span12" value="@bind(patientViewModel.registerPatientCommand.dateOfBirth)" constraint="no future"
+                             onBlur="@command('calculateAge')" visible="@load(!patientViewModel.patientExists)" placeholder="dd/MM/yyyy"/>
+                </div>
+                <div zclass="span4">
+                        <label value="Age" style="font-weight:bold"/><h:br/>
+                        <intbox sclass="span2" value="@bind(patientViewModel.enteredAge)" onBlur="@command('calculateDOB')"/>
+                            <listbox mold="select" width="41.5%"
+                                     selectedItem="@bind(patientViewModel.ageSelection)"
+                                     onSelect="@command('calculateDOB')">
+                                <listitem label="Day(s)" value="Day(s)"/>
+                                <listitem label="Week(s)" value="Week(s)"/>
+                                <listitem label="Month(s)" value="Month(s)"/>
+                                <listitem label="Year(s)" value="Year(s)"/>
+                            </listbox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Guardian Relationship" style="font-weight:bold"/>
+                    <combobox model="@bind(patientViewModel.guardianRelationShips)"
+                              readonly="true"
+                              selectedItem="@load(patientViewModel.selectedGuardianRelationShip) @save(patientViewModel.selectedGuardianRelationShip,before='selectGuardianRelationShip')"
+                              onSelect='@command("selectGuardianRelationShip")'>
+                        <template name="model" var="guardianRelation">
+                            <comboitem label="@load(guardianRelation.description)"
+                                       value="@bind(guardianRelation.enumCode)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span1"/>
+                <div zclass="span3">
+                    <label value="Guardian Name" style="font-weight:bold"/>
+                    <textbox sclass="span12" value="@bind(patientViewModel.registerPatientCommand.guardianName)"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Country" style="font-weight:bold"/>
+                    <combobox model="@bind(patientViewModel.countries)"
+                              readonly="true"
+                              selectedItem="@load(patientViewModel.selectedCountry) @save(patientViewModel.selectedCountry,before='selectCountry')"
+                              onSelect="@command('selectCountry')">
+                        <template name="model" var="country">
+                            <comboitem label="@load(country.label)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span1"/>
+                <div zclass="span3">
+                    <label value="State" style="font-weight:bold"/>
+                    <combobox sclass="span12" style="margin-left:0px" model="@bind(patientViewModel.states)"
+                              readonly="true"
+                              selectedItem="@load(patientViewModel.selectedState) @save(patientViewModel.selectedState,before='selectState')"
+                              onSelect="@command('selectState')">
+                        <template name="model" var="state">
+                            <comboitem label="@load(state.label)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span3">
+                    <label value="City" style="font-weight:bold"/>
+                    <combobox sclass="span11" style="margin-left:0px" model="@bind(patientViewModel.cities)"
+                              readonly="true"
+                              selectedItem="@load(patientViewModel.selectedCity) @save(patientViewModel.selectedCity,before='selectCity')"
+                              onSelect="@command('selectCity')">
+                        <template name="model" var="city">
+                            <comboitem label="@load(city)"/>
+                        </template>
+                    </combobox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Address Line 1" style="font-weight:bold"/>
+                    <textbox  value="@bind(patientViewModel.registerPatientCommand.addressLine1)"/>
+                </div>
+                <div zclass="span1"/>
+                <div zclass="span3">
+                    <label value="Address Line 2" style="font-weight:bold"/>
+                    <textbox  sclass="span12"  value="@bind(patientViewModel.registerPatientCommand.addressLine2)"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Address Line 3" style="font-weight:bold"/>
+                    <textbox  sclass="span12"  value="@bind(patientViewModel.registerPatientCommand.addressLine3)"/>
+                </div>
+            </div>
+            <div id="saveDiv" visible="false" sclass="panelFoot">
+                <button id="saveButton" label="Save"  sclass="btn-success"  onClick="@command('registerPatient')"
+                    visible="@load(!patientViewModel.patientExists)"  />
+               <!--  <a label="View Patient Details" onClick="@command('viewPaientDetails')" id="viewPatientDetalsBtn"
+                     visible="false"/>-->
+                <a visible="false" label="View Patient Admission Details" onClick="@command('navigateToPatientDetails')" id="viewPatientDetalsBtn"/>
+        </div>
+        </div>
+
+        <zscript>
+            public void openModal(com.master.domain.Enumeration.EnumerationType type,String masterName){
+
+            }
+        </zscript>
+    </window>
+</zk>

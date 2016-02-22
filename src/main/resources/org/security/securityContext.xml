@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:p="http://www.springframework.org/schema/p"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+    <global-method-security pre-post-annotations="enabled"/>
+
+    <http pattern="/forgotPassword.zul" security="none"/>
+    <http pattern="/login.zul*" security="none"/>
+    <http pattern="/css/**" security="none"/>
+    <http pattern="/images/**" security="none"/>
+    <http pattern="/zk/*" security="none"/>
+    <http pattern="/license.zul*" security="none"/>
+
+    <http auto-config="true">
+        <intercept-url pattern="/**/*.zul" access="IS_AUTHENTICATED_REMEMBERED" />
+        <form-login login-page="/login.zul" always-use-default-target="true"
+                    default-target-url="/com/personsample/personPanel.zul"
+                    authentication-failure-url="/login.zul?login_error=1"
+                    authentication-success-handler-ref="authenticationSuccessHandler"/>
+        <logout logout-url="/resources/j_spring_security_logout" invalidate-session="true"
+                logout-success-url="/login.zul"/>
+        <logout delete-cookies="JSESSIONID"/>
+    </http>
+
+    <beans:bean id="saltSource"
+                class="org.springframework.security.authentication.dao.SystemWideSaltSource"
+                p:systemWideSalt ="dhr"/>
+
+
+    <beans:bean class="org.springframework.security.authentication.encoding.ShaPasswordEncoder" id="passwordEncoder"/>
+
+    <beans:bean id="daoAuthenticationProvider"
+                class="org.springframework.security.authentication.dao.DaoAuthenticationProvider"
+                p:passwordEncoder-ref="passwordEncoder"
+                p:saltSource-ref="saltSource"
+                p:userDetailsService-ref="userService"/>
+
+    <authentication-manager>
+        <authentication-provider ref="daoAuthenticationProvider"/>
+    </authentication-manager>
+
+    <beans:bean id="authenticationSuccessHandler"
+                class="org.nthdimenzion.security.presentation.AuthenticationSuccessHandler">
+        <beans:property name="alwaysUseDefaultTargetUrl" value="true"/>
+        <beans:property name="defaultTargetUrl" value="/personSample/personPanel.zul"/>
+    </beans:bean>
+
+
+    <beans:bean id="userValidationService" class="org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl">
+        <beans:property name="dataSource" ref="dataSourceRef"/>
+        <beans:property name="enableGroups" value="true"/>
+        <beans:property name="enableAuthorities" value="false"/>
+        <beans:property name="usersByUsernameQuery"
+                        value="select ul.username,ul.password,ul.enabled from USER_LOGIN ul where ul.username = ?"/>
+        <beans:property name="groupAuthoritiesByUsernameQuery" value="select sg.id group_id,sg.name group_name,sp.PERMISSION_ID permission
+			from USER_LOGIN ul,SECURITY_GROUP sg,SECURITY_PERMISSION sp,
+			USERLOGIN_SECURITY_GROUPS ulsg,
+			SECURITYGROUP_SECURITY_PERMISSIONS sgsp
+			where ul.username = ?
+			and ul.id = ulsg.USERLOGIN
+			and ulsg.SECURITYGROUPS = sg.id
+			and sgsp.SECURITYGROUP = sg.id
+			and sgsp.SECURITYPERMISSIONS = sp.id"/>
+    </beans:bean>
+
+</beans:beans>

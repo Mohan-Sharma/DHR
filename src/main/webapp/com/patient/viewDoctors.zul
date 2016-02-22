@@ -1,0 +1,62 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/createUserLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <style>.z-timebox-inp{ width:70px !important; }</style>
+    <zscript>
+        pagetitle.setValue("Digital Health Records -- DHR");
+        subpagetitle.setValue("List of Doctors");
+    </zscript>
+    <window id="viewDoctorWin"
+            self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('vm') @init('com.patientadmission.presentation.DoctorViewModel')">
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;" align="center">
+                All Registered Doctors
+            </n:h3>
+        </div>
+        <hbox style="margin-left: 63%">
+            <textbox value="@bind(vm.keyword)" vflex="1" style="border: 1px solid #000000" placeholder="search doctor" width="150px" height="20px"/>
+            <button label="Search" onClick="@command('search')" sclass="btn btn-mini btn-success"/>
+            <button label="Clear" onClick="@command('clearKeyword')" sclass="btn btn-mini btn-danger"/>
+        </hbox>
+        <grid model="@load(vm.allDoctors)" mold="paging" pageSize="10">
+
+            <columns menupopup="auto">
+                <column label="Doctor Id" width="10%" align="center"></column>
+                <column label="First Name" width="20%" align="center"></column>
+                <column label="Last Name" width="20%" align="center"></column>
+                <column label="Gender" width="10%" align="center"></column>
+                <column label="Email Id" align="center"></column>
+                <column label="Contact Number" width="20%" align="center"></column>
+            </columns>
+            <template name="model" var="doctor">
+                <row>
+                    <cell>
+                        <label value="${doctor.id}"/>
+                    </cell>
+                    <cell>
+                        <label value="${doctor.firstName}"/>
+                    </cell>
+                    <cell>
+                        <label value="${doctor.lastName}"/>
+                    </cell>
+                    <cell>
+                        <label value="${doctor.gender}"/>
+                    </cell>
+                    <cell>
+                        <label value="${doctor.emailId}"/>
+                    </cell>
+                    <cell>
+                        <label value="${doctor.contactNumber}"/>
+                    </cell>
+                </row>
+            </template>
+        </grid>
+    </window>
+</zk>

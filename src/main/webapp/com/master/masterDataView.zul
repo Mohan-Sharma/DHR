@@ -1,0 +1,58 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/layout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <zscript><![CDATA[
+import org.nthdimenzion.presentation.infrastructure.Navigation;
+import org.zkoss.zkplus.spring.SpringUtil;
+import org.zkoss.zk.ui.Component;
+import org.nthdimenzion.object.utils.Constants;
+
+
+]]></zscript>
+    <window id="viewMasterDataWin" title="View Master Data" border="normal"
+            self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('masterViewModel') @init('com.master.presentation.viewmodel.MasterViewModel')">
+
+        <panel title="List of Master Data">
+            <panelchildren>
+                <listbox id="masterDataListBox" model="@load(masterViewModel.allEnumerations)" mold="paging"
+                         pageSize="10">
+                    <listhead>
+                        <listheader>Enumeration Code</listheader>
+                        <listheader>Enumeration Description</listheader>
+                        <listheader>Enumeration Type</listheader>
+                    </listhead>
+
+                    <template name="model" var="enumeration">
+                        <listitem value="@bind(enumeration)">
+                            <listcell>
+                                <label value="@load(enumeration.enumCode)"/>
+                            </listcell>
+                            <listcell>
+                                <label value="@load(enumeration.description)"/>
+                            </listcell>
+                            <listcell>
+                                <label value="@load(enumeration.enumType)"/>
+                            </listcell>
+                        </listitem>
+                    </template>
+                </listbox>
+            </panelchildren>
+        </panel>
+
+
+    </window>
+
+    <vbox self="@{define(left)}">
+        <a id="createMasterData" label="Create Master Data" onClick='navigation.redirect("createMasterData")'/>
+
+    </vbox>
+
+
+</zk>

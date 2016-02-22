@@ -1,0 +1,64 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/createUserLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <style src="/css/mainCSS.css"/>
+    <zscript>
+        pagetitle.setValue("Digitized Health Records -- DHR");
+        subpagetitle.setValue("Enter Doctor Information");
+    </zscript>
+    <window id="registerPatientWin" self="@{define(content)}"
+            apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('vm') @init('com.master.view.CreateDoctorViewVM')" width="98%"  validationMessages="@id('vmsgs')">
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;" align="center">
+                Register New Doctor
+            </n:h3>
+        </div>
+        <grid vflex="1" form="@id('fx') @load(vm) @save(vm, before='createDoctor') @validator(vm.formValidator)">
+            <rows>
+                <row>
+                    <cell width="20%">First Name<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox width="70%" id="firstName" value="@save(vm.doctorDto.firstName, before='createDoctor')" constraint="no empty:*Required"/></cell>
+                    <cell width="20%">Last Name<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox width="70%" id="lastName" value="@save(vm.doctorDto.lastName, before='createDoctor')" constraint="no empty:*Required"/></cell>
+                </row>
+                <row>
+                    <cell width="20%" >Email ID<label value="*" style="color: #ff0000"/> :</cell><cell width="30%" ><textbox width="70%"  id="emailId" constraint="/.+@.+\.[a-z]+/: Required" value="@save(vm.doctorDto.emailId, before='createDoctor')"/></cell>
+                    <cell width="20%" >Mobile Number<label value="*" style="color: #ff0000"/> :</cell><cell width="35%"><textbox width="70%"  constraint="no empty,/^[0-9]{10,10}$/:*Required 10 Digits" id="phoneNo" value="@save(vm.doctorDto.phoneNumber, before='creat)Doctor')" maxlength="10"/></cell>
+                </row>
+                <row>
+                    <cell>Gender :</cell>
+                    <cell>
+                        <radiogroup selectedItem="@save(vm.doctorDto.gender, before='createDoctor')">
+                            <radio label="Male" value="male" checked="true"/>
+                            <radio label="Female" value="female" style="margin-left: 20px"/>
+                        </radiogroup>
+                    </cell>
+                    <cell>Departments<label value="*" style="color: #ff0000"/> :<label value="@bind(vmsgs['selectedDepartments'])" style="color: red;" /></cell>
+                    <cell>
+                        <listbox multiple="true" selectedItems="@save(vm.doctorDto.selectedDepartments)"
+                                 model="@load(vm.departments)"  vflex="true" mold="select" width="200px" height="100px"
+                                 style="font: 12px Tahoma, Arial, Sans-serif; margin-top: 5px; align-items: center" >
+                                <template name="model" var="row" sort="auto">
+                                    <listitem  label="${row.departmentName}"/>
+                                </template>
+                        </listbox>
+                    </cell>
+                </row>
+                <row>
+                    <cell width="20%" >User Name<label value="*" style="color: #ff0000"/> :</cell><cell width="30%" ><textbox width="70%"  id="userName" constraint="no empty: Required" value="@save(vm.doctorDto.userName, before='createDoctor')"/></cell>
+                </row>
+                <!--<row>
+                    <cell width="20%" >Passport Number : </cell><cell width="30%"><textbox  width="70%"  value="@save(vm.customerDto.passportNumber)"/></cell>
+                    <cell width="20%" >Additional Address :</cell><cell width="30%"><textbox width="70%" value="@save(vm.customerDto.additionalAddress)"/></cell>
+                </row>-->
+                <row>
+                    <button label="Create" onClick="@command('createDoctor', doctorDto = vm.doctorDto)" sclass="btn-success" style="margin-left: 10px;"></button>
+                </row>
+            </rows>
+        </grid>
+    </window>
+</zk>

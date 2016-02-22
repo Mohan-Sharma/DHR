@@ -1,0 +1,242 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?meta name="viewport" content="width=device-width, initial-scale=1.0" ?>
+<?page title="Digital Health Records" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <style src="/css/mainCSS.css"/>
+    <h:script type="text/javascript" src="protoFluid.js" />
+    <h:script type="text/javascript" src="bootstrap.js"/>
+    <h:script type="text/javascript">
+        function onClickMenu(id ) {
+            var d = document.getElementById(id);
+            d.className = d.className + " open";
+
+        }
+
+        $('body').bind('click', function(e) {
+            if($(e.target).closest('#menu').length == 0) {
+                // click happened outside of menu, hide any visible menu items
+                var  general = document.getElementById("menu");
+                general.className = "dropdown";
+
+            }
+            if($(e.target).closest('#Procedure').length == 0) {
+                // click happened outside of menu, hide any visible menu items
+                var  general = document.getElementById("Procedure");
+                general.className = "dropdown";
+
+            }
+            if($(e.target).closest('#Disease').length == 0) {
+                // click happened outside of menu, hide any visible menu items
+                var  general = document.getElementById("Disease");
+                general.className = "dropdown";
+
+            }
+
+        });
+    </h:script>
+    <style>
+        /* Sticky footer styles
+        -------------------------------------------------- */ .panelFoot
+        { /*border: 1px solid #C9D2D7;*/ padding: 4px 8px;
+            background-color:#F5F5F5; text-align:center; }
+
+        .boldLabel{ font-weight:bold; }
+
+        .labelReq{ color:red; }
+
+        #wrap {
+            min-height: 100%;
+            height: auto !important;
+            height: 100%;
+            width: 100%;
+            /* Negative indent footer by it's height */
+            margin: 0 auto -50px;
+        }
+
+        /* Set the fixed height of the footer here */ #push, #footer {
+                                                          height: 60px; } #footer { background-color: #f5f5f5; }
+
+    </style>
+    <zscript>
+        import org.zkoss.zk.ui.event.Events;
+    </zscript>
+    <div zclass="navbar navbar-inverse navbar-fixed-top">
+        <div zclass="navbar-inner">
+            <div zclass="container">
+                <h:a class="btn btn-navbar" data-toggle="collapse"
+                     data-target=".nav-collapse">
+                    <span sclass="icon-bar"></span>
+                    <span sclass="icon-bar"></span>
+                    <span sclass="icon-bar"></span>
+                </h:a>
+                <a zclass="brand" href="#">Digital Records</a>
+                <div zclass="nav-collapse collapse">
+                    <h:ul class="nav">
+                       <!-- <h:li role="presentation" id="menu15" >
+                            <a label="Timelines" href="timelines.zul"
+                               onClick='Events.postEvent("onPush",breadCrumbDiv,self)'>
+                            </a>
+                        </h:li>-->
+                        <h:li  id="menu" class="dropdown">
+                            <h:a href="#" class="dropdown-toggle"
+                                 id="dLabel" data-target="#" data-toggle="dropdown"
+                                 role="button">
+                                General Reports
+                                <attribute name="onClick">
+                                    onClickMenu("menu");
+                                </attribute>
+                                <h:b class="caret"></h:b>
+                            </h:a>
+                            <h:ul class="dropdown-menu"
+                                  aria-labelledby="drop1" role="menu">
+                            </h:ul>
+                            <h:ul class="dropdown-menu"
+                                  aria-labelledby="drop1" role="menu" style="margin-left:15px">
+                                <h:li role="presentation" id="menu1" >
+                                    <a label="Global Search" href="viewDemography.zul"  onClick='Events.postEvent("onPush",breadCrumbDiv,self)'/>
+                                </h:li>
+                                <h:li role="presentation" id="menu2">
+                                    <a label= "Patient Index" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewPatientIndex.zul"/>
+                                </h:li>
+                                <h:li role="presentation" id="menu11">
+                                    <a label="Department Index" onClick='Events.postEvent("onPush",breadCrumbDiv,self)'
+                                       href="viewDepartmentIndex.zul" />
+                                </h:li>
+                                <h:li role="presentation" id="menu7">
+                                    <a label="Department Wise Statistics" visible="false" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewDepartmentWiseStatistics.zul"/>
+                                </h:li>
+                                <h:li role="presentation" id="menu8">
+                                    <a label="Ward Wise Statistics" visible="false" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewWardWiseStatistics.zul"/>
+                                </h:li>
+                                <h:li role="presentation" id="menu12">
+                                    <a label="Daily Census" visible="false" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewDailyCensus.zul"/>
+                                </h:li>
+                                <h:li role="presentation" id="menu13">
+                                    <a label="Department Wise Census" visible="false" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewDepartmentWiseCensus.zul"/>
+                                </h:li>
+                                <h:li role="presentation" id="menu14">
+                                    <a label="Ward Wise Census" visible="false" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewWardWiseCensus.zul">
+                                        Ward Wise Census
+                                    </a>
+                                </h:li>
+                                <h:li role="presentation" id="menu19">
+                                    <a label="Ward Index" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewWardIndex.zul"/>
+                                </h:li>
+                                <h:li role="presentation" id="menu18">
+                                    <a label="Physician Index" visible="false" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="ViewPhysicianIndex.zul"/>
+                                </h:li>
+                            </h:ul>
+                        </h:li>
+                        <h:li id="Procedure" class="dropdown" style="margin-left:15px">
+                            <h:a href="#" class="dropdown-toggle"
+                                 id="ProcedureLabel" data-target="#" data-toggle="dropdown"
+                                 role="button">
+                                Procedure
+                                <attribute name="onClick">
+                                    onClickMenu("Procedure");
+
+                                </attribute>
+                                <h:b class="caret"></h:b>
+                            </h:a>
+                            <h:ul class="dropdown-menu"
+                                  aria-labelledby="drop1" role="menu">
+
+                                <h:li role="presentation" id="menu4">
+                                    <a label="Procedure Index" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewProcedureIndex.zul"/>
+                                </h:li>
+
+                                <h:li role="presentation" id="menu6">
+                                    <a label="Procedure Wise Statistics" visible="false" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewProcedureWiseStatistics.zul"/>
+                                </h:li>
+                            </h:ul>
+                        </h:li>
+                        <h:li id="Disease" class="dropdown" style="margin-left:15px">
+                            <h:a href="#" class="dropdown-toggle"
+                                 id="DiseaseLabel" data-target="#" data-toggle="dropdown"
+                                 role="button">
+                                Disease
+                                <attribute name="onClick">
+                                    onClickMenu("Disease");
+                                </attribute>
+                                <h:b class="caret"></h:b>
+                            </h:a>
+                            <h:ul class="dropdown-menu"
+                                  aria-labelledby="drop1" role="menu" style="margin-left:15px">
+
+                                <h:li role="presentation" id="menu3">
+                                    <a label="Disease Index" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewDiseaseIndex.zul"/>
+                                </h:li>
+                                <h:li role="presentation" id="menu5">
+                                    <a label="Disease Wise Statistics" visible="false" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewDiseaseWiseStatistics.zul"/>
+                                </h:li>
+                                <h:li role="presentation" id="menu9">
+                                    <a label="Leading Diseases" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewLeadingDiseases.zul"/>
+                                </h:li>
+                                <h:li role="presentation" id="menu10">
+                                    <a label="Leading Diseases Department Wise" onClick='Events.postEvent("onPush",breadCrumbDiv,self)' href="viewLeadingDiseasesDepartmentWise.zul"/>
+                                </h:li>
+
+                            </h:ul>
+                        </h:li>
+                        <h:li style="margin-left:15px">
+                            <a label="Manage Account" href="manageAccount.zul"  onClick='Events.postEvent("onPush",breadCrumbDiv,self)'/>
+                        </h:li>
+                        <h:li style="margin-left:15px">
+                            <a
+                                    href="/resources/j_spring_security_logout">
+                                Logout
+                            </a>
+                        </h:li>
+                    </h:ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h:br />
+    <h:div id="wrap">
+        <!-- Begin page content -->
+        <div zclass="container">
+            <n:h5 style="width:100%;text-align:center">
+
+                <label value="${requestScope.message}" id="successMsg"
+                       style="font-size:14px;color:#00AA00;line-height:40px;font-weight:bold" />
+            </n:h5>
+            <separator bar="true" />
+            <separator bar="true" />
+            <breadcrumb id="breadCrumbDiv"/>
+            <separator bar="true" />
+            <div self="@{insert(content)}" id="center"
+                 sclass="mid img-rounded" style="overflow:auto;" />
+        </div>
+        <h:div id="push"></h:div>
+    </h:div>
+    <h:div id="footer" style="border:0px;background-color:black; height:50px;">
+        <div>
+            <n:table width="100%" style="border:0px;background-color:#00000;" cellspacing="0px" cellpadding="0px">
+                <n:tr>
+                    <n:td width="100%" height="21px"
+                          style="display: block;padding: 4px 0;position: relative;">
+                        <div align="center" style="margin-top:4px">
+                            <n:span class="class1">
+                                <zscript>
+                                    java.util.Calendar cal = java.util.Calendar.getInstance();
+                                    int year = cal.get(java.util.Calendar.YEAR);
+                                </zscript>
+                                <a href="http://www.nthdimenzion.com" target="_New"
+                                   style="font-size:13px;color:#FFFFFF;font-family: Calibri;">
+                                    Copyright (c) 2009-${year} NthDimenzion Solutions (P) Limited - www.nthdimenzion.com
+                                </a>
+                            </n:span>
+                        </div>
+                    </n:td>
+                </n:tr>
+            </n:table>
+        </div>
+    </h:div>
+</zk>

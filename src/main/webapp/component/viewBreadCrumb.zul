@@ -1,0 +1,20 @@
+<zk>
+	<div>
+		<zscript><![CDATA[
+			List alst = (List) arg.get("model") == null ? new ArrayList() : arg.get("model");
+			List breadCrumb = new ArrayList();
+			List currentCrumbList = new ArrayList();
+			if (alst != null && alst.size() > 0) {
+				currentCrumbList.add(alst.get(alst.size() - 1));
+			}
+			for (int i = 0; i < alst.size() - 1; i++) {
+				breadCrumb.add(alst.get(i));
+			}
+]]></zscript>
+		<a label="${each.label}>>" forEach="${breadCrumb}"
+			href="${each.href}"
+			onClick='Events.postEvent("onPop",self.getParent().getParent(),self)'>
+		</a>
+		<label forEach="${currentCrumbList}" value="${each.label}"></label>
+	</div>
+</zk>

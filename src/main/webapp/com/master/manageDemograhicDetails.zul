@@ -1,0 +1,17 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <style src="/css/mainCSS.css"/>
+    <window id="manageDemographicDetails" title="View Doctors Demographic Details" border="normal" self="@{define(leftDiv)}">
+        <div>
+            <label>somthing</label>
+        </div>
+
+    </window>
+</zk>

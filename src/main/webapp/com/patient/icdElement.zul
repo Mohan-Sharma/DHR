@@ -1,0 +1,50 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <window id="icdElementWin" zclass="popup_container" border="none"
+            apply="org.zkoss.bind.BindComposer" mode="modal" closable="true"  position="right,center"
+            viewModel="@id('icdElementViewModel') @init('com.patientadmission.presentation.IcdElementViewModel')">
+        <div zclass="modal" width="55%">
+            <div zclass="modal-header page-header">
+                <button zclass="close" onClick="icdElementWin.detach();">x</button>
+                <h:h5>Diagnosis Search</h:h5>
+            </div>
+            <div zclass="modal-body">
+                <div zclass="container-fluid">
+                    <div zclass="row-fluid">
+                        <div zclass="span4">
+                            <label value="ICD Code"  sclass="boldLabel"/>
+                            <textbox value="@bind(icdElementViewModel.icdCode)" sclass="span12"/>
+                        </div>
+                        <div zclass="span8">
+                            <label value="ICD Description" sclass="boldLabel"/>
+                            <textbox sclass="span12" value="@bind(icdElementViewModel.description)"/>
+                        </div>
+                    </div>
+                </div>
+                <div sclass="panelFoot">
+                    <button label="Search" onClick="@command('searchIcdElements')" sclass="btn-success"/>
+                </div>
+                <listbox id="icdElementListBox" model="@bind(icdElementViewModel.icdElements)" mold="paging"
+                         pageSize="10" multiple="@bind(icdElementViewModel.multiSelect)" checkmark="@bind(icdElementViewModel.multiSelect)">
+                    <listhead>
+                        <listheader label="Code" width="10%"/>
+                        <listheader label="Description"  width="90%"/>
+                    </listhead>
+                    <template name="model" var="icdElement">
+                        <listitem value="@bind(icdElement)" onClick="@command('selectIcd',id=icdElement.id)">
+                            <listcell label="@load(icdElement.icdCode)"/>
+                            <listcell label="@load(icdElement.description)"/>
+                        </listitem>
+                    </template>
+                </listbox>
+            </div>
+            <div sclass="panelFoot">
+                <button label="Add Selected ICDs" onClick="@command('addSelectedIcds',listbox=icdElementListBox)" sclass="btn-primary"/>
+            </div>
+        </div>
+    </window>
+</zk>

@@ -1,0 +1,38 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <window id="addIndicationsForAdmissionWin" zclass="popup_container" border="none"
+            apply="org.zkoss.bind.BindComposer" mode="modal" closable="true" position="right,center"
+            viewModel="@id('indicationAdmissionViewModel') @init('com.patientadmission.presentation.IndicationsForAdmissionViewModel')">
+        <div zclass="modal" width="55%">
+            <div zclass="modal-header page-header">
+                <button zclass="close" onClick="addIndicationsForAdmissionWin.detach();">x</button>
+                <h:h5>Selected Indications for Admission</h:h5>
+            </div>
+            <div zclass="modal-body">
+                <panel>
+                    <panelchildren>
+                        <listbox id="indicationsListBox"
+                                 model="@bind(indicationAdmissionViewModel.indicationsForAdmissionList)"
+                                 multiple="true" checkmark="true" rows="10">
+                            <listhead>
+                                <listheader label="Description"/>
+                            </listhead>
+                            <template name="model" var="indication">
+                                <listitem value="@bind(indication)">
+                                    <listcell label="@load(indication.description)"/>
+                                </listitem>
+                            </template>
+                        </listbox>
+                    </panelchildren>
+                </panel>
+            </div>
+            <div sclass="panelFoot">
+                <button label="Add" sclass="btn-primary" onClick="@command('addSelectedIndications',listbox=indicationsListBox)"/>
+            </div>
+        </div>
+    </window>
+</zk>

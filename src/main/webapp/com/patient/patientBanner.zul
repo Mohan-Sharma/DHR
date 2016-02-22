@@ -1,0 +1,51 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/layout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <zscript>
+        pagetitle.setValue("Digital Health Records -- DHR");
+        subpagetitle.setValue("Viewing Admission Details ");
+    </zscript>
+    <window id="patientDetailsWin"  title="Patient Details" self="@{define(content)}"
+                apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('patientDetailsViewModel') @init('com.patientadmission.presentation.PatientDetailsViewModel')">
+        <div sclass="page-header">
+            <include src="patientInfo.zul"/>
+        </div>
+        <h:br/>
+		    <button label="Add Patient Admission" onClick="@command('navigateToPatientAdmission')" sclass="btn-mini btn-primary"/>
+        <h:br/>
+		<grid model="@bind(patientDetailsViewModel.allPatientAdmissions)" mold="paging" pageSize="10">
+			<columns  menupopup ="auto">
+				<column label="IP Number" align="center"/>
+				<column label="Admission Date &amp; Time" sort="auto(fromDate)" align="center"/>
+				<column label="Discharge Date &amp; Time" sort="auto(thruDate)" align="center"/>
+                <column label="Admitting Department" align="center"/>
+                <column label="Category" visible="false" align="center"/>
+                <column label="Case Sheet"/>
+			</columns>
+                    <template name="model" var="admission">
+                        <row value="@bind(admission)">
+                            <a label="@load(admission.inPatientNumber)" onClick="@command('viewAdmissionDetails',inPatientNumber=admission.inPatientNumber)"/>
+                        	<label value="@load(admission.fromDate)@converter('formatedDate', format='dd/MM/yyyy hh:mm a')"/>
+                        	<label value="@load(admission.thruDate)@converter('formatedDate', format='dd/MM/yyyy hh:mm a')"/>
+                            <label onCreate="@command('display',admDeptId=admission.ADMITTINGDEPT,label=self)"/>
+                            <label value="@load(admission.description)"/>
+                            <a label="@load(admission.fileName)" onClick="@command('downloadDocument',content=admission)"/>
+             	         </row>
+                      </template>
+		</grid>
+        <h:br/>
+        <button label="Back" onClick="@command('back')"  style="margin-left:470px;" zclass="btn-primary btn"/>
+        <h:br/>
+	</window>
+	        <vbox self="@{define(left)}">
+            <a id="viewRegisteredPatients" label="View Registered Patients" onClick='navigation.redirect
+            ("viewRegisteredPatients")'/>
+        </vbox>
+</zk>

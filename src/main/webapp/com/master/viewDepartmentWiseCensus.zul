@@ -1,0 +1,110 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+	xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+	<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+	<window id="viewDiseaseIndex" border="none"
+		self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('DepartmentWiseCensusViewModel') @init('com.patientadmission.presentation.DepartmentWiseCensusViewModel')">
+		<div style="border:1px solid #EEEEEE">
+			<n:h3 style="background-color: #EEEEEE;">
+				Department Wise Census 
+			</n:h3>
+			<h:div id="searchBox">
+				<h:div id="searchBox_inner">
+					<div zclass="container-fluid">
+						<h:div id="patient">
+							<h:div id="admission_body">
+								<div zclass="row-fluid">
+									<div sclass="span3">
+										<label
+											value="Date From" style="font-weight:bold" />
+										<datebox sclass="span12"
+											format="dd/MM/yyyy"
+											value="@bind(DepartmentWiseCensusViewModel.admissionDate)"
+											placeholder="dd/MM/yyyy" />
+									</div>
+									<div sclass="span3">
+										<label value="Date To"
+											style="font-weight:bold" />
+										<datebox sclass="span12"
+											format="dd/MM/yyyy"
+											value="@bind(DepartmentWiseCensusViewModel.admissionDateThru)"
+											placeholder="dd/MM/yyyy" />
+									</div>
+									<div>
+										<div zclass="span3">
+											<label
+												value="Admitted Department" style="font-weight:bold" />
+											<combobox sclass="span12"
+												model="@bind(DepartmentWiseCensusViewModel.admittingDepartments)"
+												constraint="no empty" readonly="true"
+												selectedItem="@load(DepartmentWiseCensusViewModel.selectedDepartment) @save(DepartmentWiseCensusViewModel.selectedDepartment,after='selectAdmittingDepartment')"
+												onSelect="@command('selectAdmittingDepartment')">
+												<template name="model"
+													var="dept">
+													<comboitem
+														label="@load(dept.departmentName)" />
+												</template>
+											</combobox>
+										</div>
+									</div>
+								</div>
+							</h:div>
+						</h:div>
+					</div>
+				</h:div>
+			</h:div>
+			<h:br />
+			<div sclass="panelFoot">
+				<button label="Search" sclass="btn-primary"
+					onClick="@command('search')" />
+				<button label="Reset"
+					onClick="Executions.getCurrent().sendRedirect(null);" sclass="btn-danger"/>
+			</div>
+			<h:br />
+			<h:br />
+			<grid model="@load(DepartmentWiseCensusViewModel.maps)"
+				id="singleModel" visible="true" mold="paging" pageSize="10">
+				<auxhead>
+					<auxheader >
+						<n:h5>
+							Deparment
+						</n:h5>
+					</auxheader>
+					<auxheader  colspan="2" >
+						<n:h5>
+							Admitted
+						</n:h5>
+					</auxheader >
+					<auxheader colspan="2" >
+						<n:h5>
+							Discharged
+						</n:h5>
+					</auxheader>
+				</auxhead>
+				<columns >
+					<column label="" width="20%"></column>
+					<column label="Male" ></column>
+					<column label="Female" ></column>
+					<column label="Male"  />
+					<column label="Female" />
+				</columns>
+				<template name="model" var="detail">
+					<row value="@bind(detail)">
+						<label value="@bind(detail.DEPARTMENTNAME)" />
+						<label value="@bind(detail.ADMISSION_MALE)" />
+						<label value="@bind(detail.ADMISSION_FEMALE)" />
+						<label value="@bind(detail.DISCHARGE_MALE)" />
+						<label value="@bind(detail.DISCHARGE_FEMALE)" />
+					</row>
+				</template>
+			</grid>
+		</div>
+	</window>
+</zk>

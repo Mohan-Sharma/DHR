@@ -1,0 +1,163 @@
+<?meta name="viewport" content="width=device-width, initial-scale=1.0" ?>
+<?page title="Digital Health Records" contentType="text/html;charset=UTF-8"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <style src="/css/mainCSS.css"/>
+    <style>
+        /* Sticky footer styles
+        -------------------------------------------------- */
+
+        .row-fluid .span1 {
+            width: 1.98291%;
+        }
+
+        .z-spinner-real-readonly, .z-doublespinner-real-readonly, .z-timebox-real-readonly, .z-datebox-real-readonly, .z-bandbox-real-readonly, .z-combobox-real-readonly {
+            background-color: #FFFFFF;
+        }
+        .panelFoot {
+            /*border: 1px solid #C9D2D7;*/
+            padding: 4px 8px;
+            background-color:#F5F5F5;
+            text-align:center;
+        }
+
+        .boldLabel{
+            font-weight:bold;
+        }
+
+        .labelReq{
+            color:red;
+        }
+
+        #wrap {
+            min-height: 100%;
+            height: auto !important;
+            height: 100%;
+            width: 100%;
+            /* Negative indent footer by it's height */
+            margin: 0 auto -50px;
+        }
+
+        /* Set the fixed height of the footer here */
+        #push,
+        #footer {
+            height: 50px;
+        }
+        #footer {
+            background-color: #000000;
+        }
+    </style>
+    <!-- <div sclass="top">
+        <include src="/org/layout/header.zul"/>
+    </div>-->
+    <!-- <div sclass="tabs clr">
+        <include src="/org/layout/menu.zul"/>
+    </div>-->
+    <div zclass="navbar navbar-inverse navbar-fixed-top" width="100%">
+        <div zclass="navbar-inner" width="100%">
+            <div zclass="container" width="100%">
+                <!--<h:a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                </h:a>-->
+                <a zclass="brand" href="#" width="15%">Patient Records</a>
+                <div zclass="nav-collapse collapse">
+                    <h:ul class="nav">
+                        <h:li class="active">
+                            <a id="registerPatient" label="Register Patient" onClick='navigation.redirect("registerPatient")'/>
+                        </h:li>
+                        <h:li class="active dropdown" style="margin-left:5px">
+                            <a label="Preference" onClick='navigation.openModalWindow("setPreference",null)'/>
+                        </h:li>
+                        <!--<h:li class="active dropdown" style="margin-left:5px">
+                            <a label="Create Account" onClick='navigation.redirect("createAccount")'/>
+                        </h:li>
+                        <h:li class="active dropdown" style="margin-left:5px">
+                            <a label="Create Doctor" onClick='navigation.redirect("createDoctor")'/>
+                        </h:li>
+                        <h:li class="active dropdown" style="margin-left:5px">
+                            <a label="Create User" onClick='navigation.redirect("createUser")'/>
+                        </h:li>
+                        <h:li class="active dropdown" style="margin-left:5px">
+                            <a label="View All Users" onClick='navigation.redirect("viewUsers")'/>
+                        </h:li>
+                        <h:li class="active dropdown" style="margin-left:5px">
+                            <a label="View All Doctors" onClick='navigation.redirect("viewDoctors")'/>
+                        </h:li>-->
+                        <h:li class="active dropdown" style="margin-left:5px">
+                            <a label="Logout" href="/resources/j_spring_security_logout"/>
+                        </h:li>
+                        <!--<h:li  style="margin-left:20px" class="active dropdown">
+                            <menubar id="menubar" vflex="1" style="margin-top:7px">
+                                <menu label="Actions">
+                                    <menupopup>
+                                        <menuitem label="Create New Doctor" onClick='navigation.redirect("createDoctor")'/>
+                                        <menuitem label="Do something else"/>
+                                        <menuitem label="Logout" href="/resources/j_spring_security_logout">
+                                        </menuitem>
+                                    </menupopup>
+                                </menu>
+                            </menubar>
+                        </h:li>-->
+
+                        <!--<h:li class="active dropdown" style="margin-left:20px">
+                            <a href="/resources/j_spring_security_logout">Logout</a>
+                        </h:li>-->
+
+                    </h:ul>
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+        </div>
+    </div>
+    <h:div id="wrap">
+        <h:div class="container" style="display: block;margin-top:10px">
+            <h:div class="page-header">
+                <n:h1>
+                    <label id="pagetitle" style="font-size:14px;color:#008872;line-height:30px;font-weight:bold"/>
+                    <h:small>
+                        <label id="subpagetitle"/>
+                    </h:small>
+                </n:h1>
+            </h:div>
+            <n:h5 style="width:100%;text-align:center">
+                <label value="${requestScope.message}" id="successMsg"
+                       style="font-size:14px;color:#00AA00;line-height:40px;font-weight:bold"/>
+            </n:h5>
+            <hlayout height="100%" style="width:100%;">
+                <!--<div id="rightOfCenter" sclass="mid" self="@{insert(leftMenu)}"/>-->
+                <div self="@{insert(content)}" id="center" sclass="mid" width="100%" hflex="1" />
+            </hlayout>
+            <h:div id="push"></h:div>
+        </h:div>
+    </h:div>
+    <h:div id="footer" class="footer">
+        <div>
+            <n:table width="100%" style="border:0px;background-color:#00000;" cellspacing="0px" cellpadding="0px">
+                <n:tr>
+                    <n:td width="100%" height="21px"
+                          style="display: block;padding: 4px 0;position: relative;">
+                        <div align="center" style="margin-top:4px">
+                            <n:span class="class1">
+                                <zscript>
+                                    java.util.Calendar cal = java.util.Calendar.getInstance();
+                                    int year = cal.get(java.util.Calendar.YEAR);
+                                </zscript>
+                                <a href="http://www.nthdimenzion.com" target="_New"
+                                   style="font-size:13px;color:#FFFFFF;font-family: Calibri;">
+                                    Copyright (c) 2009-${year} NthDimenzion Solutions (P) Limited - www.nthdimenzion.com
+                                </a>
+                            </n:span>
+                        </div>
+                    </n:td>
+                </n:tr>
+            </n:table>
+        </div>
+    </h:div>
+
+    <!--
+            <div self="@{insert(left)}" style="overflow:auto;"/>
+    -->
+
+</zk>

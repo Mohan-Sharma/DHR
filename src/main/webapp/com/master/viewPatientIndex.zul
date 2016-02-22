@@ -1,0 +1,189 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+	xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+	<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+	<window id="viewDoctorWin" border="none" self="@{define(content)}"
+		apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('pivm') @init('com.patientadmission.presentation.PatientIndexViewModel')">
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;" align="center">
+            Patient Index Report
+			</n:h3>
+		<h:div id="searchBox">
+			<h:div id="searchBox_inner">
+				<div zclass="container-fluid">
+					<h:div id="patient">
+					
+						<h:div id="patient_body">
+							<div zclass="row-fluid">
+								<div sclass="span3">
+									<label value="First Name"
+										style="font-weight:bold" />
+									<textbox sclass="span12"
+										value="@bind(pivm.firstName)" />
+								</div>
+								<div sclass="span3">
+									<label value="Last Name"
+										style="font-weight:bold" />
+									<textbox sclass="span12"
+										value="@bind(pivm.lastName)" />
+								</div>
+								<div sclass="span3">
+									<label value="Age (in years)"
+										style="font-weight:bold" />
+									<div sclass="span12">
+										<listbox id="ageListBox"
+											mold="select" sclass="span6"    style="margin-top:0px" height="23px"
+											onSelect="@command('selectCondition',item=self.selectedItem.value)">
+											<listitem label="Less Than"
+												selected="true" value="Less Than" />
+											<listitem label="Equal To"
+												value="Equal To" />
+											<listitem
+												label="Greater Than" value="Greater Than" />
+											<listitem label="In Between"
+												value="In Between" />
+										</listbox>
+										<intbox value="@bind(pivm.age)"
+											sclass="span4" />
+									</div>
+								</div>
+
+								<div sclass="span3">
+									<separator orient="vertical" />
+									<div sclass="span12">
+										<intbox sclass="span4"
+											visible="false" value="@bind(pivm.thruAge)" id="thruAgeBox" />
+									</div>
+								</div>
+
+							</div>
+							<div zclass="row-fluid">
+								<div sclass="span3">
+									<label value="MR Number"
+										style="font-weight:bold" />
+									<textbox sclass="span12"
+										value="@bind(pivm.mrnNumber)" />
+								</div>
+								<div sclass="span3">
+									<label value="IP Number"
+										style="font-weight:bold" />
+									<textbox sclass="span12"
+										value="@bind(pivm.inPatientNumber)" />
+								</div>
+								<div sclass="span3">
+									<label value="Gender"
+										style="font-weight:bold" />
+									<listbox id="genderListBox"
+										mold="select" sclass="span12"
+										onSelect="@command('selectGender',content=self.getSelectedItem().getValue())">
+										<listitem label=""
+											selected="true" />
+										<listitem label="MALE"
+											value="MALE" />
+										<listitem label="FEMALE"
+											value="FEMALE" />
+									</listbox>
+								</div>
+							</div>
+						</h:div>
+						<h:div id="admission_body">
+							<div zclass="row-fluid">
+								<div sclass="span3">
+									<label value="Admission Date From"
+										style="font-weight:bold" />
+									<datebox sclass="span12"
+										format="dd/MM/yyyy" value="@bind(pivm.admissionDate)"
+										placeholder="dd/MM/yyyy" />
+								</div>
+								<div sclass="span3">
+									<label value="Admission Date To"
+										style="font-weight:bold" />
+									<datebox sclass="span12"
+										format="dd/MM/yyyy" value="@bind(pivm.admissionDateThru)"
+										placeholder="dd/MM/yyyy" />
+								</div>
+								<div sclass="span3">
+									<label value="Discharge Date From"
+										style="font-weight:bold" />
+									<datebox sclass="span12"
+										format="dd/MM/yyyy" value="@bind(pivm.dischargeDate)"
+										placeholder="dd/MM/yyyy" />
+								</div>
+								<div sclass="span3">
+									<label value="Discharge Date To"
+										style="font-weight:bold" />
+									<datebox sclass="span12"
+										format="dd/MM/yyyy" value="@bind(pivm.dischargeDateThru)"
+										placeholder="dd/MM/yyyy" />
+								</div>
+							</div>
+						</h:div>
+					</h:div>
+				</div>
+			</h:div>
+		</h:div>
+		<h:br />
+		<div sclass="panelFoot">
+			<button label="Search" sclass="btn-success"	onClick="@command('search',minPage=0 ,maxPage=10 )"/>
+            <button label="Reset"  sclass="btn-danger" onClick="Executions.getCurrent().sendRedirect(null);" />
+        </div>
+		<h:br />
+		<h:br />
+		<n:h6>
+					Click on the IP Number to View the Case Sheet
+		</n:h6>
+		<grid id="viewPatient" model="@load(pivm.list)" mold="paging" >
+			<columns menupopup="auto">
+				<column label="MR Number" align="center" width="12%"></column>
+				<column label="IP Number" align="center" width="13%"></column>
+				<column label="Name of Patient" align="center" width="18%"></column>
+				<column label="Date Of Birth" align="center"></column>
+				<column label="Age" align="center"></column>
+				<column label="Gender" align="center"></column>
+				<column label="Address Details" align="center" width="25%"></column>
+			</columns>
+			<template name="model" var="detail">
+				<row value="@bind(detail)">
+					<a label ="@bind(detail.MEDICAL_RECORD_NUMBER)" onClick="@command('viewPatientInfo',mrnNumber=detail.MEDICAL_RECORD_NUMBER)"/>
+					<hlayout>
+						<grid zclass="none" model="@bind(detail.IN_PATIENT_LIST)">
+							<template name="model" var="detail1">
+								<row value="@bind(detail1)">
+									<a label="@bind(detail1)" onClick="@command('openFileViewer',content=detail1)"/>
+								</row>
+							</template>
+						</grid>
+					</hlayout>
+
+					<hlayout>
+						<label value="@bind(detail.FIRST_NAME)" />
+						<label value="@bind(detail.LAST_NAME)" />
+					</hlayout>
+					<label value="@bind(detail.DOB)@converter('formatedDate', format='dd/MM/yyyy')"  />
+					<label
+						onCreate="@command('calulateAge',dob=detail.DOB,label=self)" />
+					<label value="@bind(detail.GENDER)" />
+					<hlayout>
+						<label value="@bind(detail.ADDR1)" />
+						<label value="@bind(detail.ADDR2)" />
+						<label value="@bind(detail.ADDR3)" />
+					</hlayout>
+				
+
+					<!--
+						<a label="@bind(detail.FILE_NAME)" onClick="@command('downloadDocument',content=detail)"/>
+					-->
+				</row>
+			</template>
+		</grid>
+        </div>
+ 		<paging id="simplePaging" onCreate="@command('attachPagingEventListner')"  detailed="true" visible="false"  ></paging>
+	</window>
+</zk>

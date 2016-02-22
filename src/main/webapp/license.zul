@@ -1,0 +1,25 @@
+<zk xmlns="http://www.zkoss.org/2005/zul"
+	xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+	<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+	<window id="licenseWin" border="none" 
+		apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('lvm') @init('org.nthdimenzion.security.presentation.viewmodel.LicenseViewModel')">
+		<div style="margin-top:5%;margin-left:2%" align="center">
+			
+				<label value="Enter License Key" />
+				<textbox sclass="span12" width="30%"
+                             value="@save(lvm.licenseKey)" />
+				
+					
+							<button id="update" 
+						sclass="btn-primary" label="Update"
+						onClick="@command('addLicenseKey')" />
+					
+			
+		</div>
+	</window>
+</zk>

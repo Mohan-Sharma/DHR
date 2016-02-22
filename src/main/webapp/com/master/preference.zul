@@ -1,0 +1,95 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <zscript>
+        pagetitle.setValue("Digitized Health Records -- DHR");
+        subpagetitle.setValue("Set Preference");
+    </zscript>
+    <window id="preferenceWin" border="none" apply="org.zkoss.bind.BindComposer" mode="modal" height="300px"
+            viewModel="@id('preferenceViewModel') @init('com.patientadmission.presentation.PreferenceViewModel')">
+    <h:div id="modal-custom-header">
+        <h:div class="modal-header">
+            <a sclass="close btnClose" onClick="preferenceWin.detach()">×</a>
+            <h:h3>Preference</h:h3>
+            <separator bar="true"/>
+            <h:div class="modal-body">
+                <h:div class="control-group">
+                    <h:label for="name">Country</h:label>
+                    <h:div class="controls">
+                        <combobox model="@bind(preferenceViewModel.countries)"
+                                  readonly="true"
+                                  selectedItem="@load(preferenceViewModel.selectedCountry) @save(preferenceViewModel.selectedCountry)"
+                                  onSelect="@command('selectCountry')">
+                            <template name="model" var="country">
+                                <comboitem label="@load(country.label)"/>
+                            </template>
+                        </combobox>
+                    </h:div>
+                </h:div>
+                <h:div class="control-group">
+                    <h:label for="name">State</h:label>
+                    <h:div class="controls">
+                        <combobox  model="@bind(preferenceViewModel.states)"
+                                  readonly="true"
+                                  selectedItem="@load(preferenceViewModel.selectedState) @save(preferenceViewModel.selectedState,before='selectState')"
+                                  onSelect="@command('selectState')">
+                            <template name="model" var="state">
+                                <comboitem label="@load(state.label)"/>
+                            </template>
+                        </combobox>
+                    </h:div>
+                </h:div>
+                <h:div class="control-group">
+                    <h:label for="name">City</h:label>
+                    <h:div class="controls">
+                        <combobox model="@bind(preferenceViewModel.cities)"
+                                  readonly="true"
+                                  selectedItem="@load(preferenceViewModel.selectedCity) @save(preferenceViewModel.selectedCity,before='selectCity')"
+                                  onSelect="@command('selectCity')">
+                            <template name="model" var="city">
+                                <comboitem label="@load(city)"/>
+                            </template>
+                        </combobox>
+                    </h:div>
+                </h:div>
+            </h:div>
+            <h:div class="modal-footer">
+                <h:div style="float:left;margin-top:8px; ">
+                    <button sclass="btn btn-primary" onClick="@command('updatePreference')" label="Okay"/>
+                    <button sclass="btn-danger" label="Cancel" style="margin-left: 10px;" onClick="preferenceWin.detach()"/>
+                </h:div>
+            </h:div>
+        </h:div>
+    </h:div>
+
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Country" style="font-weight:bold"/>
+                    <combobox sclass="span12" model="@bind(preferenceViewModel.countries)"
+                              readonly="true"
+                              selectedItem="@load(preferenceViewModel.selectedCountry) @save(preferenceViewModel.selectedCountry,before='selectCountry')"
+                              onSelect="@command('selectCountry')">
+                        <template name="model" var="country">
+                            <comboitem label="@load(country.label)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span3">
+                    <label value="State" style="font-weight:bold"/>
+
+                </div>
+                <div zclass="span3">
+                    <label value="City" style="font-weight:bold"/>
+
+                </div>
+            </div>
+            <div sclass="panelFoot">
+
+        </div>
+        </div>
+    </window>
+</zk>

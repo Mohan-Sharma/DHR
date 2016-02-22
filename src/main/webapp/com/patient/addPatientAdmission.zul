@@ -1,0 +1,179 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/layout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <style>
+        .z-timebox-inp{
+            width:70px !important;
+        }
+    </style>
+    <zscript>
+        pagetitle.setValue("Digital Health Records -- DHR");
+        subpagetitle.setValue("Add/Edit Admission Details ");
+    </zscript>
+    <window id="createPatientAdmissionWin" title="Patient Admission" self="@{define(content)}"
+            apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('patientAdmissionViewModel') @init('com.patientadmission.presentation.PatientAdmissionViewModel')">
+        <div sclass="page-header">
+            <include src="patientInfo.zul"/>
+        </div>
+        <h:br/>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span2" style="margin-left:5px">
+                    <label value="IP Number" style="font-weight:bold" id="lbl"/><label value="*" style="color: #ff0000"/>
+                    <textbox sclass="span12" value="@save(patientAdmissionViewModel.modelMap.inPatientNumber, before={'saveAdmissionDetails', 'continueToClinicalDetails'}) @load(patientAdmissionViewModel.modelMap.inPatientNumber)"
+                             onBlur="@command('findPatientAdmission', inPatientNumber=self.getValue())" disabled="@load(patientAdmissionViewModel.inPatientBoxDisabled)" constraint="no empty:Required"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3" style="margin-left:5px">
+                    <label value="Admission Date and Time" style="font-weight:bold"/>
+                    <datebox  cols="20" value="@bind(patientAdmissionViewModel.modelMap.admissionDateAndTime)"
+                              format="dd/MM/yyyy hh:mm a" id="dischargeDateAndTime"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Discharge Date and Time" style="font-weight:bold"/>
+                    <datebox sclass="span5" cols="20" value="@bind(patientAdmissionViewModel.modelMap.dischargedDateAndTime)" format="dd/MM/yyyy hh:mm a"
+                             onBlur="@command('calculateLengthOfStay',dischargeDateAndTime=self.getValue(),admissionDateAndTime=dischargeDateAndTime.getValue())"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Length of Stay" style="font-weight:bold"/>
+                    <intbox cols="3" sclass="span12" disabled="true"
+                            value="@bind(patientAdmissionViewModel.modelMap.lengthOfStay)"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Admitting Department" style="font-weight:bold"/>
+                    <combobox  model="@bind(patientAdmissionViewModel.modelMap.admittingDepartments)"
+                               readonly="true" id="cmdAdmittingDept"
+                              selectedItem="@bind(patientAdmissionViewModel.selectedAdmittingDepartment)">
+                        <template name="model" var="dept">
+                            <comboitem label="@load(dept.departmentName)" value="${dept.departmentId}"/>
+                        </template>
+                    </combobox>
+                    <a sclass="btn btn-mini" href="#" id="addNewDept"
+                       onClick="@command('newAdmittingDepartment')"><h:i class="icon-plus"></h:i></a>
+                </div>
+                <div zclass="span3">
+                    <label value="Admitting Doctor" style="font-weight:bold"/>
+                    <combobox  model="@bind(patientAdmissionViewModel.modelMap.allDoctors)"
+                              readonly="true"
+                              selectedItem="@bind(patientAdmissionViewModel.selectedAdmittingDoctor)">
+                        <template name="model" var="doc">
+                            <comboitem label="@load(doc.name)"/>
+                        </template>
+                    </combobox>
+                    <!--<a sclass="btn btn-mini" href="#" style="left-padding:15px" id="addDoctor"
+                       onClick="@command('registerDoctor')"><h:i class="icon-plus"></h:i></a>-->
+                    <!--<button label="New Doctor" onClick="@command('registerDoctor')" id="addDoctor"/>-->
+                </div>
+                <div zclass="row-fluid">
+                    <div zclass="span2" style="margin-left: 25px;">
+                        <label value="MLC Number" style="font-weight:bold"/>
+                        <textbox value="@save(patientAdmissionViewModel.modelMap.mlcNumber , before={'saveAdmissionDetails', 'continueToClinicalDetails'}) @load(patientAdmissionViewModel.modelMap.mlcNumber)"/>
+                    </div>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Admitting Ward" style="font-weight:bold"/>
+                    <combobox  model="@bind(patientAdmissionViewModel.modelMap.allWards)"    readonly="true"
+                              selectedItem="@bind(patientAdmissionViewModel.selectedAdmittingWard)">
+                        <template name="model" var="ward">
+                            <comboitem label="@load(ward.wardName)"/>
+                        </template>
+                    </combobox>
+                    <a sclass="btn btn-mini" href="#" style="left-padding:15px" id="addNewAdmittingWard"
+                       onClick="@command('newAdmittingWard')"><h:i class="icon-plus"></h:i></a>
+                    <!--<button label="New Admitting Ward" onClick="@command('newAdmittingWard')" id="addNewAdmittingWard"/>-->
+                </div>
+                <div zclass="span3">
+                    <label value="Admitting Bed" style="font-weight:bold"/>
+                    <combobox model="@bind(patientAdmissionViewModel.modelMap.allBeds)"  readonly="true"
+                              selectedItem="@bind(patientAdmissionViewModel.selectedAdmittingBed)">
+                        <template name="model" var="bed">
+                            <comboitem label="@load(bed.name)"/>
+                        </template>
+                    </combobox>
+                    <a sclass="btn btn-mini" href="#" style="left-padding:15px" id="addNewAdmittingBed"
+                       onClick="@command('newAdmittingBed')"><h:i class="icon-plus"></h:i></a>
+                    <!--<button label="New Admitting Bed" onClick="@command('newAdmittingBed')" id="addNewAdmittingBed"/>-->
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Discharge Ward" style="font-weight:bold"/>
+                    <combobox  model="@bind(patientAdmissionViewModel.modelMap.allWards)"  readonly="true"
+                              selectedItem="@bind(patientAdmissionViewModel.selectedDischargedWard)">
+                        <template name="model" var="ward">
+                            <comboitem label="@load(ward.name)"/>
+                        </template>
+                    </combobox>
+                    <a sclass="btn btn-mini" href="#" style="left-padding:15px" id="addNewDischargeWard"
+                       onClick="@command('newDischargeWard')"><h:i class="icon-plus"></h:i></a>
+                    <!--<button label="New Discharge Ward" onClick="@command('newDischargeWard')"
+                            id="addNewDischargeWard"/>-->
+                </div>
+                <div zclass="span3">
+                    <label value="Discharge Bed" style="font-weight:bold"/>
+                    <combobox  model="@bind(patientAdmissionViewModel.modelMap.allBeds)"    readonly="true"
+                              selectedItem="@bind(patientAdmissionViewModel.selectedDischargeBed)">
+                        <template name="model" var="bed">
+                            <comboitem label="@load(bed.name)"/>
+                        </template>
+                    </combobox>
+                    <a sclass="btn btn-mini" href="#" style="left-padding:15px" id="addNewDischargeBed"
+                       onClick="@command('newDischargeBed')"><h:i class="icon-plus"></h:i></a>
+                   <!-- <button label="New Discharge Bed" onClick="@command('newDischargeBed')" id="addNewDischargeBed"/>-->
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Category" style="font-weight:bold"/>
+                    <combobox  readonly="true"
+                               model="@bind(patientAdmissionViewModel.modelMap.allCategories)"
+                              selectedItem="@bind(patientAdmissionViewModel.selectedCategory)">
+                        <template name="model" var="category">
+                            <comboitem label="@load(category.description)" value="@bind(category.enumCode)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span2">
+                        <label value="Case Sheet"  style="font-weight:bold"/>
+                        <button label="Attach Document" upload="true" onUpload="@command('attachDocument',event=event)"><!--
+							<attribute name="onUpload"><![CDATA[
+								org.zkoss.util.media.Media media = event.getMedia();
+								if (media instanceof org.zkoss.image.Image) {
+									org.zkoss.zul.Image image = new org.zkoss.zul.Image();
+									image.setContent(media);
+									image.setParent(pics);
+								} else {
+									Messagebox.show("Not an image: "+media, "Error", Messagebox.OK, Messagebox.ERROR);
+									break;
+								}
+		]]></attribute>
+					-->
+                        </button>
+                               <label value="@bind(patientAdmissionViewModel.modelMap.fileName)"/>
+                </div>
+            </div>
+            <div sclass="panelFoot">
+            <button label="Back"  onClick="@command('back')" sclass="btn-danger"/>
+	    	<button label="Save" onClick="@command('saveAdmissionDetails')" sclass="btn-primary"/>
+		    <button label="Save and Continue" onClick="@command('continueToClinicalDetails')" visible="@load(!patientAdmissionViewModel.viewMode)" sclass="btn-success" />
+		    <button label="Continue To View Clinical Details"  onClick="@command('continueToViewClinicalDetails')" visible="@load(patientAdmissionViewModel.viewMode)"/>
+            </div>
+        </div>
+    </window>
+    <vbox self="@{define(left)}">
+        <a id="viewRegisteredPatients" label="View Registered Patients" onClick='navigation.redirect
+            ("viewRegisteredPatients")'/>
+    </vbox>
+</zk>

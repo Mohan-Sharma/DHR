@@ -1,0 +1,68 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <window id="viewDoctorWin" border="none"
+            self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('dwsvm') @init('com.patientadmission.presentation.ProcedureWiseStatisticsModel')">
+
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;">
+               Procedure Wise Statistics
+            </n:h3>
+        <h:div id="searchBox">
+            <h:div id="searchBox_inner">
+                <div zclass="container-fluid">
+                    <h:div id="admission">
+                        <h:div id="admission_body">
+                            <div zclass="row-fluid">
+                                <div sclass="span3 offset3">
+                                    <label value="Discharge Date From" style="font-weight:bold"/>
+                                    <datebox sclass="span12" value="@bind(dwsvm.dischargeDate)" format="dd/MM/yyyy"
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                                <div sclass="span3">
+                                    <label value="Discharge Date To" style="font-weight:bold"/>
+                                    <datebox sclass="span12" value="@bind(dwsvm.dischargeDateThru)" format="dd/MM/yyyy"
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                            </div>
+                        </h:div>
+                    </h:div>
+                 
+                </div>
+            </h:div>
+        </h:div>
+        <h:br/>
+        <div sclass="panelFoot">
+            <button label="Search" sclass="btn-primary" onClick="@command('search')">
+            </button>
+            <button label="Reset" onClick="Executions.getCurrent().sendRedirect(null);" sclass="btn-danger"/>
+        </div>
+        <h:br/>
+        <h:br/>
+         <grid  model="@load(dwsvm.maps)" mold="paging"
+              pageSize="10">
+            <columns>
+                <column label="Procedure Code"></column>
+                <column label="Procedure Description"></column>
+                <column label="Number Of Patients"></column>
+            </columns>
+            <template name="model" var="detail">
+                <row value="@bind(detail)">
+                    <label value="@bind(detail.CPT_CODE)"/>
+                    <label value="@bind(detail.DESCRIPTION)"/>
+                    <label value="@bind(detail.CASECOUNT)"/>
+                </row>
+            </template>
+        </grid> 
+        <label style="font-weight:bold" visible="false" id="patientCountLabel"/>
+        </div>
+    </window>
+
+</zk>

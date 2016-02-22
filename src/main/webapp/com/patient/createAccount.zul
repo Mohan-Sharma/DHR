@@ -1,0 +1,88 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/createUserLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <style>.z-timebox-inp{ width:70px !important; }</style>
+    <zscript>
+        pagetitle.setValue("Digital Health Records -- DHR");
+        subpagetitle.setValue("Create User Accounts  The user will be prompted to change his default password when they try to login for the first time");
+    </zscript>
+    <window id="createAccountWin"
+            height="350px" position="right,top"
+            self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('accountViewModel') @init('com.patientadmission.presentation.AccountViewModel')" width="98%">
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;" align="center">
+                Register Account
+            </n:h3>
+        </div>
+        <grid vflex="1">
+            <columns></columns>
+            <rows>
+                <row>
+                    <hbox width="100%" align="center" widths="200px">
+
+                        <!--<label value="Select User" style="font-weight:bold"/><label value="*" style="color: #ff0000"/>-->
+                        <cell width="50%" style="font-weight:bold">Select User<label value="*" style="color: #ff0000"/>  :</cell>
+                        <combobox model="@bind(accountViewModel.doctors)"  constraint="no empty: Please Select a user"
+                                  readonly="true" width="160px"
+                                  selectedItem="@save(accountViewModel.selectedDoctor,before='addUser')">
+                            <template name="model" var="selectedDoctor">
+                                <comboitem value="selectedDoctor"
+                                           label="@load(selectedDoctor.fullName)"  />
+                            </template>
+                        </combobox>
+
+                    </hbox>
+                </row>
+                <row>
+                    <hbox width="100%" align="center" widths="200px">
+                        <cell width="50%" style="font-weight:bold">Enter the User Name<label value="*" style="color: #ff0000"/> :</cell>
+                        <!--<label value="Enter the User Name" width="150px" />-->
+                        <textbox id="userName"
+                                 value="@save(accountViewModel.newUser.userName,before='addUser')"
+                                 width="150px"
+                                 constraint="no empty: Please enter a username"/>
+                    </hbox>
+                </row>
+                <row>
+                    <hbox width="100%" align="center" widths="150px">
+                        <cell width="50%" style="font-weight:bold">Default Password is :</cell>
+                        <textbox id="defaultpassword"  type="text" disabled="true"
+                                 value="@load(accountViewModel.newUser.defaultPassword)" width="150px" />
+                    </hbox>
+                </row>
+                <!-- <row>
+                    <hbox width="100%" align="center" widths="150px">
+                        Enter the Password
+                        <textbox id="password"  type="password" value="@bind(accountViewModel.newUser.password)" width="150px" />
+                    </hbox>
+                </row>
+                <row>
+                    <hbox width="100%" align="center" widths="150px">
+                        ReEnter the  Password
+                        <textbox id = "confirmPass" type="password" value="@bind(accountViewModel.newUser.confirmPassword)" width="150px" />
+                    </hbox>
+                </row> -->
+                <row>
+                    <hbox width="100%" align="center" widths="150px">
+                        <button label="Create" width="100px" onClick="@command('addUser')" id="btnCreate" sclass="btn-success" style="margin-left: 20px;">
+                        </button>
+                        <button label="Cancel" width="100px" sclass="btn-danger">
+                            <attribute name="onClick">
+                                navigation.redirect("createAccount");
+                            </attribute>
+                        </button>
+                        <!-- 	<button label="View Users" width="100px" onClick="@command('viewUsers')">
+                        </button> -->
+                    </hbox>
+                </row>
+            </rows>
+        </grid>
+    </window>
+</zk>

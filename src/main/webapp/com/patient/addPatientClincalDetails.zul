@@ -1,0 +1,241 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/layout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <zscript>
+        pagetitle.setValue("Digital Health Records -- DHR");
+        subpagetitle.setValue("Add/Edit Discharge Summary Data ");
+    </zscript>
+
+    <window id="createPatientClinicalDetaialsWin" title="Patient Clinical Details"
+            self="@{define(content)}"
+            apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('patientClinicalDetailsViewModel') @init('com.patientadmission.presentation.PatientClinicalDetailsViewModel')" width="98%">
+        <div sclass="page-header">
+            <include src="patientInfo.zul"/>
+        </div>
+        <h:br/>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span12">
+                    <label value="Indications for Admission" sclass="boldLabel"/>
+                    <a label="Add Indications" style="float:right"
+                       onClick="@command('addIndicationsForAdmission',listbox = indicationsModel)"/>
+                    <listbox model="@bind(patientClinicalDetailsViewModel.selectedIndications)" height="100px"
+                             id="indicationsModel">
+                        <listhead>
+                            <listheader label="Description"/>
+                        </listhead>
+                        <template name="model" var="indication">
+                            <listitem value="@bind(indication)">
+                                <listcell>
+                                    <label value="@bind(indication.description)"/>
+                                    <space/>
+                                    <a label="Remove" style="color:red" onClick="@command('removeIndications',item=indication)"/>
+                                </listcell>
+                            </listitem>
+                        </template>
+                    </listbox>
+                </div>
+            </div>
+
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Referred From" sclass="boldLabel"/>
+                    <div sclass="span12">
+                        <combobox model="@bind(patientClinicalDetailsViewModel.referredFrom)" sclass="span6"
+                                  selectedItem="@load(patientClinicalDetailsViewModel.selectedReferredFrom) @save(patientClinicalDetailsViewModel.selectedReferredFrom,before='selectReferredFrom')"
+                                  onSelect="@command('selectReferredFrom',ihu=internalHospitalUnit,ic=internalClinic,outside=outsideReferral)" readonly="true">
+                            <template name="model" var="referredFrom">
+                                <comboitem label="@load(referredFrom.description)"/>
+                            </template>
+                        </combobox>
+                       <!-- <textbox sclass="span4" style="margin-left:20px"
+                                 value="@bind(patientClinicalDetailsViewModel.patientAdmissionCommand.patientClinicalDetails.referred)"
+                                 id="referred"/>-->
+                    </div>
+                </div>
+                <div zclass="span3">
+                    <label value="Internal Hospital Unit" sclass="boldLabel"/>
+                    <combobox model="@bind(patientClinicalDetailsViewModel.hospitalUnits)" sclass="span10"
+                              id="internalHospitalUnit"
+                              selectedItem="@load(patientClinicalDetailsViewModel.selectedInternalHospitalUnit) @save(patientClinicalDetailsViewModel.selectedInternalHospitalUnit,before='selectInternalHospitalUnit')"
+                              onSelect="@command('selectInternalHospitalUnit')" readonly="true">
+                        <template name="model" var="ihu">
+                            <comboitem label="@load(ihu.description)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span2">
+                    <label value="Internal Clinic" sclass="boldLabel"/>
+                    <combobox model="@bind(patientClinicalDetailsViewModel.clinicalUnits)"
+                              selectedItem="@load(patientClinicalDetailsViewModel.selectedInternalClinic) @save(patientClinicalDetailsViewModel.selectedInternalClinic,before='selectInternalClinicUnit')"
+                              onSelect="@command('selectInternalClinicUnit')" id="internalClinic" readonly="true">
+                        <template name="model" var="ic">
+                            <comboitem label="@load(ic.description)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span1"/>
+                <div zclass="span2">
+                    <label value="Outside" sclass="boldLabel"/>
+                    <textbox value="@bind(patientClinicalDetailsViewModel.patientAdmissionCommand.patientClinicalDetails.outsideReferral)"
+                             id="outsideReferral"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Condition at Discharge" sclass="boldLabel"/>
+                    <combobox model="@bind(patientClinicalDetailsViewModel.conditionAtDischarge)"
+                              selectedItem="@load(patientClinicalDetailsViewModel.selectedConditionAtDischarge) @save(patientClinicalDetailsViewModel.selectedConditionAtDischarge,before='selectConditionAtDischarge')"
+                              onSelect="@command('selectConditionAtDischarge')" readonly="true">
+                        <template name="model" var="discharge">
+                            <comboitem label="@load(discharge.description)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span3">
+                    <label value="Discharge Destination" sclass="boldLabel"/>
+                    <combobox model="@bind(patientClinicalDetailsViewModel.dischargeDestination)" sclass="span12"
+                              selectedItem="@load(patientClinicalDetailsViewModel.selectedDischargeDestination) @save(patientClinicalDetailsViewModel.selectedDischargeDestination,before='selectDischargeDestination')"
+                              onSelect="@command('selectDischargeDestination')" readonly="true">
+                        <template name="model" var="destination">
+                            <comboitem label="@load(destination.description)"/>
+                        </template>
+                    </combobox>
+                </div>
+            </div>
+            <tabbox width="100%" sclass="nav_tabs">
+                <tabs id="tabs">
+                    <tab label="Admitting Diagnosis"/>
+                    <tab label="Discharge Diagnosis"/>
+                    <tab label="Final Diagnosis"/>
+                    <tab label="Procedures"/>
+                </tabs>
+                <tabpanels>
+                    <tabpanel>
+                        <div zclass="row-fluid">
+                            <div zclass="span12">
+                                <label value="Admitting Diagnosis" sclass="boldLabel"/>
+                                <a label="Add Diagnosis" style="float:right"
+                                   onClick="@command('addAdmittingDiagnosis',admittingDiagnosisListbox=admittingDiagnosisListbox)"/>
+                                <listbox model="@bind(patientClinicalDetailsViewModel.selectedAdmittingDiagnosis)"
+                                         emptyMessage="No Admitting Diagnosis"
+                                         id="admittingDiagnosisListbox">
+                                    <listhead>
+                                        <listheader label="Code" width="20%"/>
+                                        <listheader label="Description"/>
+                                        <listheader label="Action" width="10%"/>
+                                    </listhead>
+                                    <template name="model" var="admittingIcd">
+                                        <listitem value="@bind(admittingIcd)">
+                                            <listcell label="@bind(admittingIcd.icdCode)"/>
+                                            <listcell label="@bind(admittingIcd.description)"/>
+                                            <listcell>
+    			                                <a label="Remove" style="color:red" onClick="@command('removeAdmissionDiagnosis',admissionDiagnosis=admittingIcd)"/>
+	            	                        </listcell>
+                                        </listitem>
+                                    </template>
+                                </listbox>
+                            </div>
+                        </div>
+                    </tabpanel>
+                    <tabpanel>
+                        <div zclass="row-fluid">
+                            <div zclass="span12">
+                                <label value="Discharge Diagnosis" sclass="boldLabel"/>
+                                <a label="Add Diagnosis"  style="float:right"
+                                   onClick="@command('addDischargeDiagnosis',dischargeDiagnosisListbox=dischargeDiagnosisListbox)"/>
+                                <listbox model="@bind(patientClinicalDetailsViewModel.selectedDischargeDiagnosis)"
+                                         emptyMessage="No Discharge Diagnosis"
+                                         id="dischargeDiagnosisListbox">
+                                    <listhead>
+                                        <listheader label="Code" width="20%"/>
+                                        <listheader label="Description"/>
+                                        <listheader label="Action" width="10%"/>
+                                    </listhead>
+                                    <template name="model" var="dischargeIcd">
+                                        <listitem value="@bind(dischargeIcd)">
+                                            <listcell label="@bind(dischargeIcd.icdCode)"/>
+                                            <listcell label="@bind(dischargeIcd.description)"/>
+                                            <listcell>
+    			                                <a label="Remove" style="color:red" onClick="@command('removeDischargeDiagnosis',dischargeDiagnosis=dischargeIcd)"/>
+	            	                        </listcell>
+                                        </listitem>
+                                    </template>
+                                </listbox>
+                            </div>
+                        </div>
+                    </tabpanel>
+                    <tabpanel>
+                        <div zclass="row-fluid">
+                            <div zclass="span12">
+                                <label value="Final Diagnosis" sclass="boldLabel"/>
+                                <a label="Add Diagnosis" style="float:right"
+                                   onClick="@command('addFinalDiagnosis',finalDiagnosisListbox=finalDiagnosisListbox)"/>
+                                <listbox model="@bind(patientClinicalDetailsViewModel.selectedFinalDiagnosis)"
+                                         emptyMessage="No Final Diagnosis"
+                                         id="finalDiagnosisListbox">
+                                    <listhead>
+                                        <listheader label="Code" width="20%"/>
+                                        <listheader label="Description"/>
+                                        <listheader label="Action" width="10%"/>
+                                    </listhead>
+                                    <template name="model" var="finalIcd">
+                                        <listitem value="@bind(finalIcd)">
+                                            <listcell label="@bind(finalIcd.icdCode)"/>
+                                            <listcell label="@bind(finalIcd.description)"/>
+                                            <listcell>
+    			                                <a label="Remove" style="color:red" onClick="@command('removeFinalDiagnosis',finalDiagnosis=finalIcd)"/>
+	            	                        </listcell>
+                                        </listitem>
+                                    </template>
+                                </listbox>
+                            </div>
+                        </div>
+                    </tabpanel>
+                    <tabpanel>
+                        <div zclass="row-fluid">
+                            <div zclass="span12">
+                                <label value="Procedure Done" sclass="boldLabel"/>
+                                <a label="Add Procedures" style="float:right"
+                                   onClick="@command('addProcedures',procedureDoneListbox=procedureDoneListbox)"/>
+                                <listbox model="@bind(patientClinicalDetailsViewModel.selectedProceduresDone)"
+                                         emptyMessage="No Procedures."
+                                         id="procedureDoneListbox">
+                                    <listhead>
+                                        <listheader label="Code" width="20%"/>
+                                        <listheader label="Description"/>
+                                        <listheader label="Action" width="10%"/>
+                                    </listhead>
+                                    <template name="model" var="procedure">
+                                        <listitem value="@bind(procedure)">
+                                            <listcell label="@bind(procedure.mainId3)"/>
+                                            <listcell label="@bind(procedure.description)"/>
+                                            <listcell>
+    			                                <a label="Remove" style="color:red" onClick="@command('removeProceduresPerformedDiagnosis',procedure=procedure)"/>
+	            	                        </listcell>
+                                        </listitem>
+                                    </template>
+                                </listbox>
+                            </div>
+                        </div>
+                    </tabpanel>
+                </tabpanels>
+            </tabbox>
+        </div>
+        <div sclass="panelFoot">
+            <button label="Back" onClick="@command('back')" sclass="btn-danger"
+                    />
+            <button label="Save" onClick="@command('savePatientAdmissionAndClinicalDetails')"
+                     sclass="btn-success"/>
+        </div>
+    </window>
+    <vbox self="@{define(left)}">
+        <a id="viewRegisteredPatients" label="View Registered Patients" onClick='navigation.redirect
+            ("viewRegisteredPatients")'/>
+    </vbox>
+</zk>

@@ -1,0 +1,59 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/createUserLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+	xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+	<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+	<style>.z-timebox-inp{ width:70px !important; }</style>
+	<zscript>
+	pagetitle.setValue("Digital Health Records -- DHR");
+        subpagetitle.setValue("List of Active Users in the system");
+</zscript>
+	<window id="ViewUsers"
+		height="500px" self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('CreateAccountViewModel') @init('com.patientadmission.presentation.AccountViewModel')" width="97%">
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;" align="center">
+                All Authorized Users
+            </n:h3>
+        </div>
+		<grid id="viewUsers" model="@bind(CreateAccountViewModel.allUsers)" mold="paging" vflex="1" pageSize="8">
+				<columns menupopup="auto" >
+                    <column label="User Name" align="center" width="10%"/>
+                    <column label="First Name" align="center" width="18%"/>
+                    <column label="Last Name" align="center" width="10%"/>
+                    <column label="Disable User" align="center" width="20%"/>
+                    <column label="Assign Default Password" align="30%"/>
+					<column label="role" align="7%"/>
+					<column label="Action" align="center"/>
+
+                </columns>
+            <template name="model" var="user">
+					<row value="@bind(user)">
+						<label value="@bind(user.userName)" />
+						<label value="@bind(user.firstName)" />
+						<label value="@bind(user.lastName)" />
+                        <button label="Delete User Login"
+                                onClick="@command('disableUser',user=self.getParent().getValue())" sclass="btn-danger"></button>
+                        <button label="Assign Default Password"
+                                onClick="@command('assignDefaultPassword',user=self.getParent().getValue())" sclass="btn-primary"></button>
+						<cell>
+							<listbox multiple="false" selectedItems="@save(CreateAccountViewModel.selectedRole)"
+								model="@load(CreateAccountViewModel.roles)"  vflex="true" mold="select"
+								style="font: 12px Tahoma, Arial, Sans-serif; margin-top: 5px; align-items: center">
+								<template name="model" var="row" sort="auto">
+									<listitem label="${row}" onCreate="@command('checkSelectedDepartments', listItem=self, user=self.getParent().getParent().getParent().getValue())"/>
+								</template>
+							</listbox>
+						</cell>
+						<button label="Change Role"
+								onClick="@command('changeRole',user=self.getParent().getValue())" sclass="btn-danger"></button>
+					</row>
+				</template>
+			
+			</grid>
+	</window>
+</zk>

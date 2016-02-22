@@ -1,0 +1,1289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.patientadmission.presentation.queries.PatientAdmissionFinder">
+
+
+    <select id="findAllBeds" resultType="hashMap">
+        SELECT id, name FROM bed WHERE entity_status = 0
+    </select>
+
+    <select id="findAllCountries" resultType="hashMap">
+        SELECT id, label FROM country WHERE entity_status = 0
+    </select>
+
+    <select id="findAllStatesInCountry" resultType="hashMap">
+        SELECT id, label FROM state WHERE entity_status = 0 AND country_id = #{countryId}
+    </select>
+
+    <select id="findAllCitiesInState" resultType="hashMap">
+        SELECT cities
+        FROM state_cities
+        WHERE state = #{stateId}
+    </select>
+
+    <!--  <select id="findAllWards" resultType="hashMap">
+         SELECT id, WARD_NAME as name FROM ward WHERE entity_status = 0
+     </select> -->
+
+    <sql id="selectDoctors">
+        SELECT d.id,d.LAST_NAME as lastName,d.MIDDLE_NAME as middleName,d.FIRST_NAME as firstName
+        ,d.contact_number,concat(concat(d.first_name,' ' ),last_name) as fullName,d.contact_number as contactNumber,
+        d.gender, d.email_id as emailId
+        FROM doctor d
+        WHERE d.entity_status = 0
+    </sql>
+
+    <select id="findAllDoctors" resultType="hashMap">
+        <include refid="selectDoctors"/>
+    </select>
+
+    <select id="findAllDoctorsWithOutUserLogins" resultType="hashMap">
+        <include refid="selectDoctors"/>
+        and NOT EXISTS (SELECT DISTINCT doctor FROM user_login WHERE entity_status = 0 AND doctor = d.id)
+    </select>
+    <select id="findAllAdmittingDepartments" resultType="hashMap">
+        SELECT id as departmentId, DEPARTMENT_NAME as departmentName FROM admitting_department WHERE entity_status = 0
+    </select>
+    <select id="findAllDepartments" resultType="hashMap">
+        <include refid="selectDepartments"/>
+        and NOT EXISTS (SELECT DISTINCT DEPARTMENT_NAME FROM admitting_department WHERE entity_status = 0 AND DEPARTMENT_NAME = d.id)
+    </select>
+    <sql id="selectDepartments">
+        SELECT d.id,d.DEPARTMENT_NAME as departmentName       
+        FROM admitting_department d
+        WHERE d.entity_status = 0
+    </sql>
+    <select id="findAllWards" resultType="hashMap">
+        <include refid="selectWards"/>
+        and NOT EXISTS (SELECT DISTINCT WARD_NAME FROM ward WHERE entity_status = 0 AND WARD_NAME = w.id)
+    </select>
+    <sql id="selectWards">
+        SELECT w.id,w.WARD_NAME as wardName       
+        FROM ward w
+        WHERE w.entity_status = 0
+    </sql>
+
+    <select id="getPatientByMRN" resultType="hashMap">
+
+        SELECT pat.id patientId,
+        pat.addr1,
+        pat.addr2,
+        pat.addr3,
+        pat.country countryId,
+        country.label countryName,
+        pat.state stateId,
+        state.label stateName,
+        pat.city cityName,
+        pat.guardian_name AS guardianName,
+        pat.guardianrelationship,
+        pat.contact_number,
+        pat.dob,
+        pat.first_name,
+        pat.last_name,
+        pat.middle_name,
+        pat.gender,
+        pat.title,
+        pat.medical_record_number AS medicalRecordNumber
+        FROM
+        patient pat
+        LEFT OUTER JOIN country country
+        ON pat.country = country.id
+        LEFT OUTER JOIN state state
+        ON pat.state = state.id
+        WHERE pat.medical_record_number = #{medicalRecordNumber}
+    </select>
+
+    <select id="admissionDetailsByInPatientNumber" resultType="hashMap">
+        SELECT ad.ID adminDetailsId, ad.COMPLETION_COMMENTS completionComments, ad.FROM_DATE fromDate, ad.THRU_DATE
+        thruDate,
+        ad.INPATIENT_NUMBER inPatientNumber,
+        bed.id admittingBedId, bed.name admittingBedName, admit_dept.id admittingDeptId, admit_dept.DEPARTMENT_NAME
+        admittingDepartmentId,
+        ward.id admittingWardId, ward.ward_name admittingWardName,
+        (SELECT enum_code
+        FROM enumeration
+        WHERE id = ad.category) categoryCode,
+        (SELECT description
+        FROM enumeration
+        WHERE id = ad.category) categoryDesc,
+        (SELECT id
+        FROM bed
+        WHERE id = ad.DISCHARGEBED) dischargeBedId,
+        (SELECT NAME
+        FROM bed
+        WHERE id = ad.DISCHARGEBED) dischargeBedName,
+        (SELECT id
+        FROM ward
+        WHERE id = ad.DISCHARGEWARD) dischargeWardId,
+        (SELECT NAME
+        FROM bed
+        WHERE id = ad.DISCHARGEWARD) dischargeBedName,
+        ad.DOCTOR doctorId,
+        ad.PATIENT_ID patientId,
+        cd.ID clinicalDetailsId,
+        (SELECT enum_code
+        FROM enumeration
+        WHERE id = cd.DISCHARGEDESTINATION) dischargeDestinationCode,
+        (SELECT description
+        FROM enumeration
+        WHERE id = cd.DISCHARGEDESTINATION) dischargeDestinationDesc,
+        (SELECT enum_code
+        FROM enumeration
+        WHERE id = cd.CLINICALUNIT) clinicalUnitCode,
+        (SELECT description
+        FROM enumeration
+        WHERE id = cd.CLINICALUNIT) clinicalUnitDesc,
+        (SELECT enum_code
+        FROM enumeration
+        WHERE id = cd.CONDITIONATDISCHARGE) conditionAtDischargeCode,
+        (SELECT description
+        FROM enumeration
+        WHERE id = cd.CONDITIONATDISCHARGE) conditionAtDischargeDesc,
+        (SELECT enum_code
+        FROM enumeration
+        WHERE id = cd.HOSPITALUNIT) hospitalUnitCode,
+        (SELECT description
+        FROM enumeration
+        WHERE id = cd.HOSPITALUNIT) hospitalUnitDesc,
+        (SELECT enum_code
+        FROM enumeration
+        WHERE id = cd.REFERREDFROM) referredFromCode,
+        (SELECT description
+        FROM enumeration
+        WHERE id = cd.REFERREDFROM) referredFromDesc
+        FROM admission_details ad
+        JOIN clinical_details cd ON ad.CLINICAL_DETAILS_ID = cd.ID
+        JOIN bed bed ON bed.id = ad.ADMITTINGBED
+        JOIN admitting_department admit_dept ON admit_dept.id = ad.ADMITTINGDEPT
+        JOIN ward ward ON ward.id = ad.ADMITTINGWARD
+        AND ad.INPATIENT_NUMBER = #{inPatientNumber}
+    </select>
+
+
+
+    <select id="findAllIcdElements" resultType="hashMap">
+        SELECT ICD_CODE as code,ICD_TITLE as description FROM icd_10_code
+    </select>
+
+    <select id="findAllCpts" resultType="hashMap">
+        SELECT IDNum as code,TEXT as description FROM cpt_9_cm
+    </select>
+
+    <select id="admissionDetailsPatient" resultType="hashMap">
+        SELECT admission_details.ID id,
+        FROM_DATE fromDate,
+        THRU_DATE thruDate,
+        INPATIENT_NUMBER inPatientNumber,
+        ADMITTINGBED,
+        ADMITTINGDEPT,
+        ADMITTINGWARD,
+        enumeration.description as description,
+        CLINICAL_DETAILS_ID,
+        DISCHARGEBED,
+        DISCHARGEWARD,
+        DOCTOR,
+        PATIENT_ID,
+        patient.MEDICAL_RECORD_NUMBER as mrnNumber,
+        CONTENT_TYPE as content,
+        FILE_NAME as fileName,
+        FILE_PATH as filePath,
+        CONTENT_TYPE as contentType
+        FROM
+        admission_details,patient, enumeration
+        WHERE PATIENT_ID = #{patientId} and admission_details.PATIENT_ID = patient.ID and admission_details.CATEGORY = enumeration.id;
+    </select>
+
+    <select id="getIcdElementByCodeOrCategory" resultType="hashMap" parameterType="hashMap">
+        SELECT ICD_CODE as id,ICD_TITLE as description,ICD_CODE as icdCode
+        FROM icd_10_code
+        WHERE ICD_CODE is not null
+        <if test="icdCode!=null">
+            AND UPPER(ICD_CODE) like UPPER('${icdCode}%')
+        </if>
+        <if test="description!=null">
+            AND UPPER(ICD_TITLE) like UPPER('%${description}%')
+        </if>
+        order by ICD_CODE;
+    </select>
+
+    <select id="getCptCodeOrDescription" resultType="hashMap" parameterType="hashMap">
+        SELECT IDNum as id,MainID3 as cptCode,TEXT as description
+        FROM cpt_9_cm
+        WHERE MainID3 is not null
+        <if test="cptCode!=null">
+            AND UPPER(MainID3) like UPPER('${cptCode}%')
+        </if>
+        <if test="description!=null">
+            AND UPPER(Description) like UPPER('%${description}%')
+        </if>
+        order by IDNum;
+    </select>
+
+    <select id="getPatientAdmissionDetailsByInPatientNumber" resultType="hashMap">
+        SELECT admission_details.ID AS admissionId,
+        FROM_DATE  AS admissionDateAndTime,
+        THRU_DATE  AS dischargedDateAndTime,
+        INPATIENT_NUMBER inPatientNumber,
+        ADMITTINGBED AS admittingBedId,
+        ADMITTINGDEPT admittingDepartmentId,
+        ADMITTINGWARD AS admittingWardId,
+        CATEGORY AS categoryId,
+        CLINICAL_DETAILS_ID AS clinicalDetailsId,
+        DISCHARGEBED AS dischargeBedId,
+        DISCHARGEWARD AS dischargeWardId,
+        DOCTOR AS admittingDoctorId,
+        PATIENT_ID AS patientId,
+        patient.FIRST_NAME AS firstName,
+        patient.LAST_NAME AS lastName,
+        patient.MEDICAL_RECORD_NUMBER AS mrnNumber,
+        patient.MIDDLE_NAME AS middleName,
+        admission_details.FILE_NAME AS fileName,
+        admission_details.FILE_PATH AS filePath,
+        admission_details.CONTENT_TYPE AS contentType,
+        admitting_department.department_name AS departmentName,
+        admitting_department.id AS departmentId,
+        ward.ward_name AS admittingWardName,
+        admission_details.mlc_number AS mlcNumber,
+        (SELECT ward.ward_name FROM ward WHERE ward.id = DISCHARGEWARD) AS dischargeWardName
+        FROM
+        admission_details JOIN patient ON admission_details.PATIENT_ID = patient.ID
+        LEFT OUTER JOIN admitting_department ON admission_details.admittingdept = admitting_department.id
+        LEFT OUTER JOIN ward ON ward.id = admission_details.admittingward
+        WHERE admission_details.INPATIENT_NUMBER = #{inPatientNumber}
+    </select>
+
+    <select id="findPatientClinicalDetailsById" resultType="hashMap">
+        select CLINICALUNIT,
+        CONDITIONATDISCHARGE,
+        DISCHARGEDESTINATION,
+        HOSPITALUNIT,
+        REFERREDFROM,
+        OUTSIDE_REFERRAL
+        from clinical_details
+        where clinical_details.id=#{id}
+    </select>
+    <select id="findIndicationsForAdmissionByInpatientNumber" resultType="hashMap">
+        SELECT INDICATIONFORADMISSION
+        FROM clinicaldetails_indication_for_admission,clinical_details,admission_details
+        WHERE admission_details.INPATIENT_NUMBER = #{inPatientNumber} and admission_details.CLINICAL_DETAILS_ID =
+        clinical_details.ID and
+        clinical_details.ID = clinicaldetails_indication_for_admission.CLINICALDETAILS
+    </select>
+
+    <select id="findAdmittingDiagnosisByInpatientNumber" resultType="hashMap">
+        select ADMITTINGDIAGNOSIS
+        from clinicaldetails_admitting_diagnosis,clinical_details,admission_details
+        where admission_details.INPATIENT_NUMBER = #{inPatientNumber} and admission_details.CLINICAL_DETAILS_ID =
+        clinical_details.ID and
+        clinical_details.ID = clinicaldetails_admitting_diagnosis.CLINICALDETAILS
+    </select>
+
+    <select id="findDischargeDiagnosisByInpatientNumber" resultType="hashMap">
+        select DISCHARGEDIAGNOSIS
+        from clinicaldetails_discharge_diagnosis,clinical_details,admission_details
+        where admission_details.INPATIENT_NUMBER = #{inPatientNumber} and admission_details.CLINICAL_DETAILS_ID =
+        clinical_details.ID and
+        clinical_details.ID = clinicaldetails_discharge_diagnosis.CLINICALDETAILS
+    </select>
+
+    <select id="findFinalDiagnosisByInpatientNumber" resultType="hashMap">
+        select FINALDIAGNOSIS
+        from clinicaldetails_final_diagnosis,clinical_details,admission_details
+        where admission_details.INPATIENT_NUMBER = #{inPatientNumber} and admission_details.CLINICAL_DETAILS_ID =
+        clinical_details.ID and
+        clinical_details.ID = clinicaldetails_final_diagnosis.CLINICALDETAILS
+    </select>
+
+    <select id="findProceduresPerformedByInpatientNumber" resultType="hashMap">
+        select PROCEDURESPERFORMED
+        from clinicaldetails_procedures_performed,clinical_details,admission_details
+        where admission_details.INPATIENT_NUMBER = #{inPatientNumber} and admission_details.CLINICAL_DETAILS_ID =
+        clinical_details.ID and
+        clinical_details.ID = clinicaldetails_procedures_performed.CLINICALDETAILS
+    </select>
+
+    <select id="getIcdElementByDescription" resultType="hashMap" parameterType="hashMap">
+        SELECT ICD_CODE as id,ICD_TITLE as description,ICD_CODE as icdCode
+        FROM icd_10_code
+        WHERE LOWER(ICD_TITLE) like '%${description}%'
+    </select>
+    <select id="getProceduresByDescription" resultType="hashMap" parameterType="hashMap">
+        SELECT IDNum as id,TEXT as description,MainID3 as cptCode
+        FROM cpt_9_cm
+        WHERE LOWER(TEXT) like '%${description}%'
+    </select>
+    <select id="searchPatientAdmissionDetailsBy" resultType="hashMap" parameterType="hashMap">
+        SELECT DISTINCT
+        INPATIENT_NUMBER,MEDICAL_RECORD_NUMBER,FROM_DATE,THRU_DATE,FILE_NAME,FILE_PATH,CONTENT_TYPE,FIRST_NAME,LAST_NAME,GENDER,DOB,
+        ADDR1,ADDR2,ADDR3
+        FROM admission_details,patient
+        <if test="admissionDiagnosisId !=null">,clinicaldetails_admitting_diagnosis</if>
+        <if test="dischargeDiagnosisId !=null">,clinicaldetails_discharge_diagnosis</if>
+        <if test="finalDiagnosisId !=null">
+            ,clinicaldetails_final_diagnosis
+        </if>
+        <if test="procedureId != null">
+            ,clinicaldetails_procedures_performed
+        </if>
+        WHERE
+        admission_details.PATIENT_ID = patient.id
+        <if test="inPatientNumber !=null">
+            AND
+            INPATIENT_NUMBER LIKE COALESCE('${inPatientNumber}%',INPATIENT_NUMBER)
+        </if>
+        <if test="mrnNumber !=null">
+            AND
+            MEDICAL_RECORD_NUMBER LIKE '${mrnNumber}%'
+        </if>
+        <if test="firstName !=null">
+            AND
+            UPPER(FIRST_NAME) like UPPER('%${firstName}%')
+        </if>
+        <if test="lastName !=null">
+            AND
+            UPPER(LAST_NAME) like UPPER('%${lastName}%')
+        </if>
+        <if test="admissionDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionDate}
+        </if>
+        <if test="admissionDateThru !=null">
+            AND
+            FROM_DATE &lt;= #{admissionDateThru}
+        </if>
+        <if test="dischargeDate !=null">
+            AND
+            THRU_DATE &gt;= #{dischargeDate}
+        </if>
+        <if test="dischargeDateThru !=null">
+            AND
+            THRU_DATE &lt;= #{dischargeDateThru}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="admissionDiagnosisId !=null">
+            AND admission_details.CLINICAL_DETAILS_ID = clinicaldetails_admitting_diagnosis.CLINICALDETAILS
+            AND
+            clinicaldetails_admitting_diagnosis.ADMITTINGDIAGNOSIS = #{admissionDiagnosisId}
+        </if>
+        <if test="dischargeDiagnosisId !=null">
+            AND admission_details.CLINICAL_DETAILS_ID = clinicaldetails_discharge_diagnosis.CLINICALDETAILS
+            AND clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS = #{dischargeDiagnosisId}
+        </if>
+        <if test="finalDiagnosisId !=null">
+            AND admission_details.CLINICAL_DETAILS_ID = clinicaldetails_final_diagnosis.CLINICALDETAILS
+            AND clinicaldetails_final_diagnosis.FINALDIAGNOSIS = #{finalDiagnosisId}
+        </if>
+        <if test="procedureId !=null">
+            AND admission_details.CLINICAL_DETAILS_ID =clinicaldetails_procedures_performed.CLINICALDETAILS
+            AND clinicaldetails_procedures_performed.PROCEDURESPERFORMED = #{procedureId}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+        <if test="role != null &amp;&amp; role =='DOCTOR'">
+            AND
+            admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+        </if>
+        <if test="minLimit !=null || maxLimit !=null">
+            LIMIT #{minLimit}, #{maxLimit};
+        </if>
+    </select>
+    <select id="findFileNameBy" resultType="hashMap" parameterType="hashMap">
+        SELECT INPATIENT_NUMBER,FILE_NAME,CONTENT_TYPE,FILE_PATH
+        FROM admission_details
+        WHERE
+        admission_details.INPATIENT_NUMBER = #{inPatientNumber}
+    </select>
+    <select id="searchProceduresBy" resultType="hashMap" parameterType="hashMap">
+        SELECT DISTINCT
+        ad.INPATIENT_NUMBER,
+        p.MEDICAL_RECORD_NUMBER,
+        ad.FILE_NAME,
+        ad.FILE_PATH,
+        ad.CONTENT_TYPE,
+        p.FIRST_NAME,
+        p.LAST_NAME,
+        p.GENDER,
+        ad.ADMITTINGDEPT,
+        p.DOB,
+        cpt.MainID3,
+        cpt.TEXT,
+        ad.FROM_DATE,
+        ad.THRU_DATE
+        FROM admission_details ad JOIN patient p ON ad.PATIENT_ID = p.id
+        JOIN clinicaldetails_procedures_performed cpp ON ad.CLINICAL_DETAILS_ID = cpp.CLINICALDETAILS
+        JOIN cpt_9_cm cpt ON cpp.PROCEDURESPERFORMED = cpt.IDNum
+        WHERE ad.DOCTOR = COALESCE(#{doctorId},ad.DOCTOR) AND cpt.TEXT LIKE '%${procedureId}%'
+        <if test="admissionFromDate !=null">
+            AND
+            ad.FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            ad.FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            p.gender = #{gender}
+        </if>
+        <!--<if test="procedureId != null">
+            AND
+            /*AND admission_details.CLINICAL_DETAILS_ID =clinicaldetails_procedures_performed.CLINICALDETAILS
+            AND
+            clinicaldetails_procedures_performed.PROCEDURESPERFORMED IN (SELECT IDNum AS PROCEDURESPERFORMED FROM cpt_9_cm WHERE Description LIKE '%' + #{procedureDescription} + '%') AND cpt_9_cm.IDNum =
+            clinicaldetails_procedures_performed.PROCEDURESPERFORMED*/
+
+        </if>-->
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            p.DOB &gt;= #{calculatedDate} AND p.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            p.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(p.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(p.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            p.DOB &gt;= #{nowDate} AND p.DOB &lt;= #{calculatedDate}
+        </if>
+        ORDER BY ad.INPATIENT_NUMBER;
+    </select>
+    <select id="searchDiseasesBy" resultType="hashMap" parameterType="hashMap">
+        SELECT DISTINCT
+        INPATIENT_NUMBER,MEDICAL_RECORD_NUMBER,FROM_DATE,THRU_DATE,FILE_NAME,FILE_PATH,CONTENT_TYPE,FIRST_NAME,LAST_NAME,GENDER,DOB,ADMITTINGDEPT
+        ,icd_10_code.ICD_CODE,icd_10_code.ICD_TITLE, DEPARTMENT_NAME
+        FROM admission_details,patient,
+        <include refid="selectDiseases"/>
+    </select>
+    <sql id="selectDiseases">
+        <if test="diagnosisType == 'Admitting'">
+            clinicaldetails_admitting_diagnosis,
+        </if>
+        <if test="diagnosisType == 'Discharge'">
+            clinicaldetails_discharge_diagnosis,
+        </if>
+        <if test="diagnosisType == 'Final'">
+            clinicaldetails_final_diagnosis,
+        </if>
+        icd_10_code, admitting_department
+        WHERE
+        admission_details.PATIENT_ID = patient.id AND
+        admitting_department.ID = admission_details.ADMITTINGDEPT
+        <if test="diagnosisType == 'Admitting'">
+            AND clinicaldetails_admitting_diagnosis.ADMITTINGDIAGNOSIS = icd_10_code.ICD_CODE AND
+            admission_details.CLINICAL_DETAILS_ID = clinicaldetails_admitting_diagnosis.CLINICALDETAILS
+        </if>
+
+        <if test="diagnosisType == 'Discharge'">
+            AND clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS = icd_10_code.ICD_CODE AND
+            admission_details.CLINICAL_DETAILS_ID = clinicaldetails_discharge_diagnosis.CLINICALDETAILS
+        </if>
+
+        <if test="diagnosisType == 'Final'">
+            AND clinicaldetails_final_diagnosis.FINALDIAGNOSIS = icd_10_code.ICD_CODE AND
+            admission_details.CLINICAL_DETAILS_ID =clinicaldetails_final_diagnosis.CLINICALDETAILS
+        </if>
+
+        <if test="admissionFromDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="icdElementId != null &amp;&amp; diagnosisType =='Admitting'">
+            AND admission_details.CLINICAL_DETAILS_ID =clinicaldetails_admitting_diagnosis.CLINICALDETAILS
+            AND icd_10_code.ICD_CODE = clinicaldetails_admitting_diagnosis.ADMITTINGDIAGNOSIS
+            AND icd_10_code.ICD_TITLE LIKE '%${icdElementId}%'
+        </if>
+        <if test="icdElementId != null &amp;&amp; diagnosisType =='Discharge'">
+            AND admission_details.CLINICAL_DETAILS_ID =clinicaldetails_discharge_diagnosis.CLINICALDETAILS
+            AND icd_10_code.ICD_CODE = clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS
+            AND icd_10_code.ICD_TITLE LIKE '%${icdElementId}%'
+        </if>
+        <if test="icdElementId != null &amp;&amp; diagnosisType =='Final'">
+            AND admission_details.CLINICAL_DETAILS_ID =clinicaldetails_final_diagnosis.CLINICALDETAILS
+            AND icd_10_code.ICD_CODE = clinicaldetails_final_diagnosis.FINALDIAGNOSIS
+            AND icd_10_code.ICD_TITLE LIKE '%${icdElementId}%'
+
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+        and admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+            <if test="minPage !=null || maxPage !=null">
+        </if>
+        ORDER BY admission_details.INPATIENT_NUMBER;
+    </sql>
+    <select id="searchDiseasesByCount" resultType="hashMap" parameterType="hashMap">
+        SELECT COUNT((admission_details.CLINICAL_DETAILS_ID)) AS CASECOUNT
+        FROM admission_details,patient,
+        <include refid="selectDiseases"/>
+    </select>
+
+    <select id="findDischargeDiagnosisByDischargeDate" resultType="hashMap" parameterType="hashMap">
+        SELECT icd_10_code.ICD_CODE as ICD_CODE,icd_10_code.ICD_TITLE as DESCRIPTION,icd_10_code.ICD_CODE as ID ,
+        COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM icd_10_code,clinicaldetails_discharge_diagnosis,admission_details
+        WHERE
+        admission_details.CLINICAL_DETAILS_ID = clinicaldetails_discharge_diagnosis.CLINICALDETAILS AND
+        clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS = icd_10_code.ICD_CODE
+        <if test="dischargeFromDate != null">AND admission_details.THRU_DATE &gt;=#{dischargeFromDate}</if>
+        and admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+        <if test="dischargeThruDate != null">AND admission_details.THRU_DATE &lt;=#{dischargeThruDate}</if>
+        GROUP BY ICD_CODE ORDER BY CASECOUNT DESC;
+    </select>
+
+    <select id="findDischargeDiagnosisPatientIdsByICDElementId" resultType="hashMap" parameterType="hashMap">
+        SELECT DISTINCT patient.id AS id
+        FROM patient,clinicaldetails_discharge_diagnosis,admission_details,clinical_details
+        WHERE admission_details.PATIENT_ID = patient.id AND
+        <if test="dischargeFromDate != null">admission_details.THRU_DATE &gt;=#{dischargeFromDate} AND</if>
+        <if test="dischargeThruDate != null">admission_details.THRU_DATE &lt;=#{dischargeThruDate} AND</if>
+        admission_details.CLINICAL_DETAILS_ID = clinicaldetails_discharge_diagnosis.CLINICALDETAILS AND
+        clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS = #{icdElementId}
+    </select>
+    <select id="findProceduresPerformedByDischargeDate" resultType="hashMap" parameterType="hashMap">
+        SELECT D.MainID3 AS CPT_CODE,
+        D.Text AS DESCRIPTION,
+        COUNT(DISTINCT(C.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details C,
+        CLINICAL_DETAILS A,
+        clinicaldetails_procedures_performed B,
+        cpt_9_cm D
+        WHERE A.ID = C.CLINICAL_DETAILS_ID
+        AND B.PROCEDURESPERFORMED = D.IDNum
+        AND B.CLINICALDETAILS = A.ID
+        <if test="dischargeFromDate != null">AND C.THRU_DATE &gt;=#{dischargeFromDate}</if>
+        AND c.doctor = COALESCE(#{doctorId},c.doctor)
+        <if test="dischargeThruDate != null">AND C.THRU_DATE &lt;=#{dischargeThruDate}</if>
+        GROUP BY CPT_CODE
+        ORDER BY CASECOUNT DESC;
+    </select>
+
+    <select id="findDepartmentByDischargeDate" resultType="hashMap" parameterType="hashMap">
+        SELECT B.DEPARTMENT_NAME AS DEPARTMENT_NAME,
+        COUNT(DISTINCT(A.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details A,
+        admitting_department B,patient C
+        WHERE A.PATIENT_ID = C.ID AND A.ADMITTINGDEPT = B.ID
+        <if test="dischargeFromDate != null">AND A.THRU_DATE &gt;=#{dischargeFromDate}</if>
+        <if test="dischargeThruDate != null">AND A.THRU_DATE &lt;=#{dischargeThruDate}</if>
+        GROUP BY DEPARTMENT_NAME
+        ORDER BY CASECOUNT DESC;
+    </select>
+    <select id="findWardByDischargeDate" resultType="hashMap" parameterType="hashMap">
+        SELECT B.WARD_NAME AS WARD_NAME,
+        COUNT(DISTINCT(A.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details A,
+        ward B,patient C
+        WHERE A.PATIENT_ID = C.ID AND A.ADMITTINGWARD = B.ID
+        <if test="dischargeFromDate != null">AND A.THRU_DATE &gt;=#{dischargeFromDate}</if>
+        <if test="dischargeThruDate != null">AND A.THRU_DATE &lt;=#{dischargeThruDate}</if>
+        GROUP BY WARD_NAME
+        ORDER BY CASECOUNT DESC;
+    </select>
+    <sql id="searchAllDiseases">
+        <if test="admissionFromDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+        and admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+        <if test="minPage !=null || maxPage !=null">
+            LIMIT #{minPage}, #{maxPage}
+        </if>
+    </sql>
+    <select id="searchAllDiseasesBy" resultType="hashMap" parameterType="hashMap">
+        SELECT DISTINCT
+        INPATIENT_NUMBER,MEDICAL_RECORD_NUMBER,FROM_DATE,THRU_DATE,FILE_NAME,FILE_PATH,CONTENT_TYPE,FIRST_NAME,LAST_NAME,GENDER,DOB,ADMITTINGDEPT
+        ,icd_10_code.ICD_CODE,icd_10_code.ICD_TITLE,DEPARTMENT_NAME
+        FROM admission_details,clinicaldetails_admitting_diagnosis cladmissiondiagnosis,patient,icd_10_code, admitting_department adpt
+        WHERE cladmissiondiagnosis.ADMITTINGDIAGNOSIS = icd_10_code.ICD_CODE AND admission_details.PATIENT_ID =
+        patient.ID AND cladmissiondiagnosis.CLINICALDETAILS= admission_details.CLINICAL_DETAILS_ID and adpt.id = ADMITTINGDEPT
+        <if test="icdElementId != null">
+            AND cladmissiondiagnosis.ADMITTINGDIAGNOSIS IN (select icd_code FROM icd_10_code WHERE icd_10_code.ICD_TITLE LIKE '%${icdElementId}%')
+        </if>
+        <include refid="searchAllDiseases"/>
+        UNION
+        SELECT DISTINCT
+        INPATIENT_NUMBER,MEDICAL_RECORD_NUMBER,FROM_DATE,THRU_DATE,FILE_NAME,FILE_PATH,CONTENT_TYPE,FIRST_NAME,LAST_NAME,GENDER,DOB,ADMITTINGDEPT
+        ,icd_10_code.ICD_CODE,icd_10_code.ICD_TITLE,DEPARTMENT_NAME
+        FROM admission_details,clinicaldetails_discharge_diagnosis cldischargediagnosis,patient,icd_10_code, admitting_department adpt
+
+        WHERE cldischargediagnosis.DISCHARGEDIAGNOSIS = icd_10_code.ICD_CODE AND admission_details.PATIENT_ID =
+        patient.ID AND cldischargediagnosis.CLINICALDETAILS= admission_details.CLINICAL_DETAILS_ID AND adpt.id = ADMITTINGDEPT
+        <if test="icdElementId != null">
+            AND cldischargediagnosis.DISCHARGEDIAGNOSIS = #{icdElementId}
+        </if>
+        <include refid="searchAllDiseases"/>
+        UNION
+        SELECT DISTINCT
+        INPATIENT_NUMBER,MEDICAL_RECORD_NUMBER,FROM_DATE,THRU_DATE,FILE_NAME,FILE_PATH,CONTENT_TYPE,FIRST_NAME,LAST_NAME,GENDER,DOB,ADMITTINGDEPT
+        ,icd_10_code.ICD_CODE,icd_10_code.ICD_TITLE,DEPARTMENT_NAME
+        FROM admission_details,clinicaldetails_final_diagnosis clfinaldiagnosis,patient,icd_10_code, admitting_department adpt
+        WHERE clfinaldiagnosis.FINALDIAGNOSIS= icd_10_code.ICD_CODE AND admission_details.PATIENT_ID = patient.ID AND
+        clfinaldiagnosis.CLINICALDETAILS= admission_details.CLINICAL_DETAILS_ID AND adpt.id = ADMITTINGDEPT
+        <if test="icdElementId != null">
+            AND clfinaldiagnosis.FINALDIAGNOSIS = #{icdElementId}
+        </if>
+        <include refid="searchAllDiseases"/>
+    </select>
+
+    <select id="searchDepartmentBy" resultType="hashMap" parameterType="hashMap">
+        SELECT DISTINCT
+        INPATIENT_NUMBER,MEDICAL_RECORD_NUMBER,FROM_DATE,THRU_DATE,FILE_NAME,FILE_PATH,CONTENT_TYPE,FIRST_NAME,LAST_NAME,GENDER,ADMITTINGDEPT,DOB
+        FROM admission_details,admitting_department,patient
+        WHERE admission_details.PATIENT_ID = patient.id
+        <!--AND admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)-->
+        AND COALESCE(admission_details.FROM_DATE,1) &gt;= COALESCE(#{admissionFromDate},admission_details.FROM_DATE,1)
+        AND COALESCE(admission_details.FROM_DATE,1) &lt;= COALESCE(#{admissionThruDate},admission_details.FROM_DATE,1)
+        AND COALESCE(patient.gender ,-1) = COALESCE(#{gender},patient.gender,-1)
+        AND COALESCE(ADMITTINGDEPT,-1) = COALESCE(#{departmentId},ADMITTINGDEPT,-1)
+        <if test ="comparision == 'Less Than'">
+            AND COALESCE(patient.DOB,-1) &gt; COALESCE(#{calculatedDate},-1) AND COALESCE(patient.DOB,-1) &lt;= COALESCE(CURDATE(),-1)
+        </if>
+        <if test="comparision == 'Greater Than'">
+            AND COALESCE(patient.DOB,-1) &lt; COALESCE(#{calculatedDate},patient.DOB,-1)
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND COALESCE(patient.DOB,-1) &gt;= COALESCE(#{nowDate},-1) AND COALESCE(patient.DOB,-1) &lt;= COALESCE(#{calculatedDate},-1)
+        </if>
+        <if test="role != null &amp;&amp; role == 'DOCTOR'" >
+            AND admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+        </if>
+        <if test="minPage !=null || maxPage != null">
+            LIMIT #{minPage}, #{maxPage};
+        </if>
+    </select>
+    <select id="findDischargeDiagnosisByDischargeDateByLimit" resultType="hashMap" parameterType="hashMap">
+        SELECT icd_10_code.ICD_CODE as ICD_CODE,icd_10_code.ICD_TITLE as DESCRIPTION,icd_10_code.ICD_CODE as ID ,
+        COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM icd_10_code,clinicaldetails_discharge_diagnosis,admission_details
+        WHERE
+        admission_details.CLINICAL_DETAILS_ID = clinicaldetails_discharge_diagnosis.CLINICALDETAILS AND
+        clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS = icd_10_code.ICD_CODE
+
+        <if test="dischargeFromDate != null">AND admission_details.THRU_DATE &gt;=#{dischargeFromDate}</if>
+        and admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+        <if test="dischargeThruDate != null">AND admission_details.THRU_DATE &lt;=#{dischargeThruDate}</if>
+
+        GROUP BY ICD_CODE ORDER BY CASECOUNT DESC
+        LIMIT #{limit}, #{limit1};
+    </select>
+
+    <select id="findDischargeDiagnosisAndDepartmentsByDischargeDateByLimit" resultType="hashMap"
+            parameterType="hashMap">
+        SELECT admitting_department.DEPARTMENT_NAME AS DEPARTMENT_NAME ,icd_10_code.ICD_CODE as
+        ICD_CODE,icd_10_code.ICD_TITLE as DESCRIPTION,icd_10_code.ICD_CODE as ID ,
+        COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM icd_10_code,clinicaldetails_discharge_diagnosis,admission_details,admitting_department
+        WHERE
+        admission_details.CLINICAL_DETAILS_ID = clinicaldetails_discharge_diagnosis.CLINICALDETAILS AND
+        clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS = icd_10_code.ICD_CODE
+        <if test="departmentId !=null">
+            AND
+            admission_details.ADMITTINGDEPT = #{departmentId}
+            AND
+            admitting_department.ID = #{departmentId}
+        </if>
+        <if test="dischargeFromDate != null">AND admission_details.THRU_DATE &gt;=#{dischargeFromDate}</if>
+        and admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+        <if test="dischargeThruDate != null">AND admission_details.THRU_DATE &lt;=#{dischargeThruDate}</if>
+
+        GROUP BY ICD_CODE ORDER BY CASECOUNT DESC
+        LIMIT #{limit}, #{limit1};
+    </select>
+
+    <select id="searchPatientAdmissionByDates" resultType="hashMap" parameterType="hashMap">
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,patient
+        WHERE
+        admission_details.PATIENT_ID = patient.id
+        <if test="admissionDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionDate}
+        </if>
+        <if test="admissionDateThru !=null">
+            AND
+            FROM_DATE &lt;= #{admissionDateThru}
+        </if>
+        <if test="dischargeDate !=null">
+            AND
+            THRU_DATE &gt;= #{dischargeDate}
+        </if>
+        <if test="dischargeDateThru !=null">
+            AND
+            THRU_DATE &lt;= #{dischargeDateThru}
+        </if>
+    </select>
+
+    <select id="searchPatientAdmissionByDepartmentAndDates" resultType="hashMap" parameterType="hashMap">
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,patient
+        WHERE
+        admission_details.PATIENT_ID = patient.id
+        AND COALESCE(FROM_DATE,1) &gt;= COALESCE(#{admissionDate},FROM_DATE,1)
+        AND COALESCE(THRU_DATE,1) &gt;= COALESCE(#{dischargeDate},THRU_DATE,1)
+        AND COALESCE(FROM_DATE,1) &lt;= COALESCE(#{admissionDateThru},FROM_DATE,1)
+        AND COALESCE(THRU_DATE,1) &lt;= COALESCE(#{dischargeDateThru},THRU_DATE,1)
+        AND COALESCE(ADMITTINGDEPT,-1) = COALESCE(#{departmentId},ADMITTINGDEPT,-1)
+        AND COALESCE(patient.gender ,-1) = COALESCE(#{gender},patient.gender,-1)
+    </select>
+
+    <select id="searchPatientAdmissionByWardAndDates" resultType="hashMap" parameterType="hashMap">
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,patient
+        WHERE
+        admission_details.PATIENT_ID = patient.id
+        AND COALESCE(FROM_DATE,1) &gt;= COALESCE(#{admissionDate},FROM_DATE,1)
+        AND COALESCE(THRU_DATE,1) &gt;= COALESCE(#{dischargeDate},THRU_DATE,1)
+        AND COALESCE(FROM_DATE,1) &lt;= COALESCE(#{admissionDateThru},FROM_DATE,1)
+        AND COALESCE(THRU_DATE,1) &lt;= COALESCE(#{dischargeDateThru},THRU_DATE,1)
+        AND COALESCE(ADMITTINGWARD,-1) = COALESCE(#{wardId},ADMITTINGWARD,-1)
+        AND COALESCE(patient.gender ,-1) = COALESCE(#{gender},patient.gender,-1)
+    </select>
+
+    <select id="searchPatientAdmissionDetailsCount" resultType="hashMap" parameterType="hashMap">
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,patient
+        <if test="admissionDiagnosisId !=null">,clinicaldetails_admitting_diagnosis</if>
+        <if test="dischargeDiagnosisId !=null">,clinicaldetails_discharge_diagnosis</if>
+        <if test="finalDiagnosisId !=null">
+            ,clinicaldetails_final_diagnosis
+        </if>
+        <if test="procedureId != null">
+            ,clinicaldetails_procedures_performed
+        </if>
+        WHERE
+        admission_details.PATIENT_ID = patient.id
+        <if test="inPatientNumber !=null">
+            AND
+            INPATIENT_NUMBER LIKE '${inPatientNumber}%'
+        </if>
+        <if test="mrnNumber !=null">
+            AND
+            MEDICAL_RECORD_NUMBER LIKE '${mrnNumber}%'
+        </if>
+        <if test="firstName !=null">
+            AND
+            UPPER(FIRST_NAME) like UPPER('%${firstName}%')
+        </if>
+        <if test="lastName !=null">
+            AND
+            UPPER(LAST_NAME) like UPPER('%${lastName}%')
+        </if>
+        <if test="admissionDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionDate}
+        </if>
+        <if test="admissionDateThru !=null">
+            AND
+            FROM_DATE &lt;= #{admissionDateThru}
+        </if>
+        <if test="dischargeDate !=null">
+            AND
+            THRU_DATE &gt;= #{dischargeDate}
+        </if>
+        <if test="dischargeDateThru !=null">
+            AND
+            THRU_DATE &lt;= #{dischargeDateThru}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="admissionDiagnosisId !=null">
+            AND admission_details.CLINICAL_DETAILS_ID = clinicaldetails_admitting_diagnosis.CLINICALDETAILS
+            AND
+            clinicaldetails_admitting_diagnosis.ADMITTINGDIAGNOSIS = #{admissionDiagnosisId}
+        </if>
+        <if test="dischargeDiagnosisId !=null">
+            AND admission_details.CLINICAL_DETAILS_ID = clinicaldetails_discharge_diagnosis.CLINICALDETAILS
+            AND
+            clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS = #{dischargeDiagnosisId}
+        </if>
+        <if test="finalDiagnosisId !=null">
+            AND admission_details.CLINICAL_DETAILS_ID = clinicaldetails_final_diagnosis.CLINICALDETAILS
+            AND
+            clinicaldetails_final_diagnosis.FINALDIAGNOSIS = #{finalDiagnosisId}
+        </if>
+        <if test="procedureId !=null">
+            AND admission_details.CLINICAL_DETAILS_ID =clinicaldetails_procedures_performed.CLINICALDETAILS
+            AND
+            clinicaldetails_procedures_performed.PROCEDURESPERFORMED = #{procedureId}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+        <if test="role != null &amp;&amp; role =='DOCTOR'">
+            AND
+            admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+        </if>
+    </select>
+
+
+    <select id="searchProceduresByCount" resultType="hashMap"
+            parameterType="hashMap">
+        SELECT COUNT(DISTINCT(ad.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details AS ad JOIN patient AS p ON ad.PATIENT_ID = p.id JOIN clinicaldetails_procedures_performed AS cpp ON
+        ad.CLINICAL_DETAILS_ID = cpp.CLINICALDETAILS JOIN cpt_9_cm AS cpt ON
+        cpp.PROCEDURESPERFORMED = cpt.IDNum
+        WHERE
+        ad.doctor = COALESCE(#{doctorId},ad.doctor) AND cpt.TEXT LIKE '%${procedureId}%'
+        <if test="admissionFromDate !=null">
+            AND
+            ad.FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            ad.FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            p.gender = #{gender}
+        </if>
+        <!--<if test="procedureId !=null">
+            AND
+            /*AND admission_details.CLINICAL_DETAILS_ID
+            =clinicaldetails_procedures_performed.CLINICALDETAILS
+            AND
+            clinicaldetails_procedures_performed.PROCEDURESPERFORMED IN #{procedureDescriptions} AND cpt_9_cm.IDNum =
+            clinicaldetails_procedures_performed.PROCEDURESPERFORMED*/
+            cpt.Text LIKE '%${procedureId}%'
+        </if>-->
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            p.DOB &gt;= #{calculatedDate} AND p.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            p.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(p.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(p.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            p.DOB &gt;= #{nowDate} AND p.DOB &lt;= #{calculatedDate}
+        </if>
+    </select>
+    <select id="searchDoctorBy" resultType="hashMap" parameterType="hashMap">
+        SELECT DISTINCT
+        INPATIENT_NUMBER,MEDICAL_RECORD_NUMBER,FROM_DATE,THRU_DATE,FILE_NAME,FILE_PATH,CONTENT_TYPE,FIRST_NAME,LAST_NAME,GENDER,DOCTOR,DOB
+        FROM admission_details,admitting_department,patient
+        WHERE admission_details.PATIENT_ID = patient.id
+        <if test="admissionFromDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="doctorId !=null">
+            AND
+            admission_details.DOCTOR = #{doctorId}
+        </if>
+
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+        <if test="minPage !=null || maxPage != null">
+
+            LIMIT #{minPage}, #{maxPage};
+        </if>
+    </select>
+    <select id="searchAdmittedWardBy" resultType="hashMap" parameterType="hashMap">
+        SELECT DISTINCT
+        INPATIENT_NUMBER,MEDICAL_RECORD_NUMBER,FROM_DATE,THRU_DATE,FILE_NAME,FILE_PATH,CONTENT_TYPE,FIRST_NAME,LAST_NAME,GENDER,ADMITTINGWARD,DOB
+        FROM admission_details,admitting_department,patient
+        WHERE admission_details.PATIENT_ID = patient.id
+        AND COALESCE(admission_details.FROM_DATE,1) &gt;= COALESCE(#{admissionFromDate},admission_details.FROM_DATE,1)
+        AND COALESCE(admission_details.FROM_DATE,1) &lt;= COALESCE(#{admissionThruDate},admission_details.FROM_DATE,1)
+        AND COALESCE(patient.gender ,-1) = COALESCE(#{gender},patient.gender,-1)
+        AND COALESCE(admission_details.ADMITTINGWARD,-1) = COALESCE(#{wardId},admission_details.ADMITTINGWARD,-1)
+        <if test ="comparision == 'Less Than'">
+            AND COALESCE(patient.DOB,-1) &gt;= COALESCE(#{calculatedDate},-1) AND COALESCE(patient.DOB,-1) &lt;= COALESCE(CURDATE(),-1)
+        </if>
+        <if test="comparision == 'Greater Than'">
+            AND COALESCE(patient.DOB,-1) &lt;= COALESCE(#{calculatedDate},patient.DOB,-1)
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND COALESCE(patient.DOB,-1) &gt;=COALESCE(#{nowDate},patient.DOB,-1) AND COALESCE(patient.DOB,-1) &lt;=COALESCE(#{calculatedDate},patient.DOB,-1)
+        </if>
+        <if test="role != null &amp;&amp; role == 'DOCTOR'">
+            and admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+        </if>
+
+
+    </select>
+
+    <select id="searchDoctorByCount" resultType="hashMap" parameterType="hashMap">
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,admitting_department,patient
+        WHERE admission_details.PATIENT_ID = patient.id
+        <if test="admissionFromDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="doctorId !=null">
+            AND
+            admission_details.DOCTOR = #{doctorId}
+        </if>
+
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+    </select>
+    <select id="searchDepartmentCount" resultType="hashMap" parameterType="hashMap">
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,admitting_department,patient
+        WHERE admission_details.PATIENT_ID = patient.id
+        <!--and admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)-->
+        AND COALESCE(admission_details.FROM_DATE,1) &gt;= COALESCE(#{admissionFromDate},admission_details.FROM_DATE,1)
+        AND COALESCE(admission_details.FROM_DATE,1) &lt;= COALESCE(#{admissionThruDate},admission_details.FROM_DATE,1)
+        AND COALESCE(patient.gender ,-1) = COALESCE(#{gender},patient.gender,-1)
+        AND COALESCE(ADMITTINGDEPT,-1) = COALESCE(#{departmentId},ADMITTINGDEPT,-1)
+        <if test ="comparision == 'Less Than'">
+            AND COALESCE(patient.DOB,-1) &gt; COALESCE(#{calculatedDate},-1) AND COALESCE(patient.DOB,-1) &lt;= COALESCE(CURDATE(),-1)
+        </if>
+        <if test="comparision == 'Greater Than'">
+            AND COALESCE(patient.DOB,-1) &lt; COALESCE(#{calculatedDate},patient.DOB,-1)
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND COALESCE(patient.DOB,-1) &gt;= COALESCE(#{nowDate},-1) AND COALESCE(patient.DOB,-1) &lt;= COALESCE(#{calculatedDate},-1)
+        </if>
+        <if test="role != null &amp;&amp; role == 'DOCTOR'">
+            and admission_details.doctor = COALESCE(#{doctorId},admission_details.doctor)
+        </if>
+
+    </select>
+
+    <select id="searchDiseasesCount" resultType="hashMap" parameterType="hashMap">
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,patient,
+        <if test="diagnosisType == 'Admitting'">
+            clinicaldetails_admitting_diagnosis,
+        </if>
+        <if test="diagnosisType == 'Discharge'">
+            clinicaldetails_discharge_diagnosis,
+        </if>
+        <if test="diagnosisType == 'Final'">
+            clinicaldetails_final_diagnosis,
+        </if>
+        icd_10_code
+        WHERE
+        admission_details.PATIENT_ID = patient.id
+        <if test="diagnosisType == 'Admitting'">
+            AND clinicaldetails_admitting_diagnosis.ADMITTINGDIAGNOSIS = icd_10_code.ICD_CODE AND
+            admission_details.CLINICAL_DETAILS_ID = clinicaldetails_admitting_diagnosis.CLINICALDETAILS
+        </if>
+
+        <if test="diagnosisType == 'Discharge'">
+            AND clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS = icd_10_code.ICD_CODE AND
+            admission_details.CLINICAL_DETAILS_ID = clinicaldetails_discharge_diagnosis.CLINICALDETAILS
+        </if>
+
+        <if test="diagnosisType == 'Final'">
+            AND clinicaldetails_final_diagnosis.FINALDIAGNOSIS = icd_10_code.ICD_CODE AND
+            admission_details.CLINICAL_DETAILS_ID =clinicaldetails_final_diagnosis.CLINICALDETAILS
+        </if>
+
+        <if test="admissionFromDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="icdElementId != null &amp;&amp; diagnosisType =='Admitting'">
+            AND admission_details.CLINICAL_DETAILS_ID =clinicaldetails_admitting_diagnosis.CLINICALDETAILS
+            AND
+            clinicaldetails_admitting_diagnosis.ADMITTINGDIAGNOSIS = #{icdElementId} AND
+            icd_10_code.ICD_CODE = clinicaldetails_admitting_diagnosis.ADMITTINGDIAGNOSIS
+        </if>
+        <if test="icdElementId != null &amp;&amp; diagnosisType =='Discharge'">
+            AND admission_details.CLINICAL_DETAILS_ID =clinicaldetails_discharge_diagnosis.CLINICALDETAILS
+            AND
+            clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS = #{icdElementId} AND
+            icd_10_code.ICD_CODE = clinicaldetails_discharge_diagnosis.DISCHARGEDIAGNOSIS
+        </if>
+        <if test="icdElementId != null &amp;&amp; diagnosisType =='Final'">
+            AND admission_details.CLINICAL_DETAILS_ID =clinicaldetails_final_diagnosis.CLINICALDETAILS
+            AND
+            clinicaldetails_final_diagnosis.FINALDIAGNOSIS = #{icdElementId} AND
+            icd_10_code.ICD_CODE = clinicaldetails_final_diagnosis.FINALDIAGNOSIS
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+    </select>
+    <select id="searchAllDiseasesCount" resultType="hashMap" parameterType="hashMap">
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,clinicaldetails_admitting_diagnosis cladmissiondiagnosis,patient,icd_10_code
+
+        WHERE cladmissiondiagnosis.ADMITTINGDIAGNOSIS = icd_10_code.ICD_CODE AND admission_details.PATIENT_ID =
+        patient.ID AND cladmissiondiagnosis.CLINICALDETAILS= admission_details.CLINICAL_DETAILS_ID
+        <if test="icdElementId != null">
+            AND cladmissiondiagnosis.ADMITTINGDIAGNOSIS = #{icdElementId}
+        </if>
+
+        <if test="admissionFromDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+        UNION
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,clinicaldetails_discharge_diagnosis cldischargediagnosis,patient,icd_10_code
+
+        WHERE cldischargediagnosis.DISCHARGEDIAGNOSIS = icd_10_code.ICD_CODE
+        AND admission_details.PATIENT_ID = patient.ID
+        AND cldischargediagnosis.CLINICALDETAILS= admission_details.CLINICAL_DETAILS_ID
+        <if test="icdElementId != null">
+            AND cldischargediagnosis.DISCHARGEDIAGNOSIS = #{icdElementId}
+        </if>
+
+        <if test="admissionFromDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+        UNION
+        SELECT COUNT(DISTINCT(admission_details.PATIENT_ID)) AS CASECOUNT
+        FROM admission_details,clinicaldetails_final_diagnosis clfinaldiagnosis,patient,icd_10_code
+        WHERE clfinaldiagnosis.FINALDIAGNOSIS= icd_10_code.ICD_CODE AND admission_details.PATIENT_ID = patient.ID AND
+        clfinaldiagnosis.CLINICALDETAILS= admission_details.CLINICAL_DETAILS_ID
+        <if test="icdElementId != null">
+            AND clfinaldiagnosis.FINALDIAGNOSIS = #{icdElementId}
+        </if>
+
+        <if test="admissionFromDate !=null">
+            AND
+            FROM_DATE &gt;= #{admissionFromDate}
+        </if>
+        <if test="admissionThruDate !=null">
+            AND
+            FROM_DATE &lt;= #{admissionThruDate}
+        </if>
+        <if test="gender !=null">
+            AND
+            patient.gender = #{gender}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Less Than'">
+            AND
+            patient.DOB &gt;= #{calculatedDate} AND patient.DOB &lt;= #{nowDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Greater Than'">
+            AND
+            patient.DOB &lt; #{calculatedDate}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'Equal To'">
+            AND DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(patient.DOB, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') &lt; DATE_FORMAT(patient.DOB, '00-%m-%d')) = #{age}
+        </if>
+        <if test="calculatedDate != null &amp;&amp; comparision != null &amp;&amp; comparision == 'In Between'">
+            AND
+            patient.DOB &gt;= #{nowDate} AND patient.DOB &lt;= #{calculatedDate}
+        </if>
+
+    </select>
+
+    <select id="findAllUsers" resultType="hashMap">
+        SELECT ul.username AS userName ,d.first_name AS firstName,d.last_name AS lastName,contact_number
+        AS contactNumber
+        FROM USER_LOGIN ul
+        JOIN user d ON ul.user = d.id
+        WHERE ul.entity_status = 0
+    </select>
+
+    <select id="findPatientById" resultType="hashMap" parameterType="java.util.Map">
+        SELECT id
+        FROM patient p
+        WHERE p.id = #{id}
+    </select>
+    <select id="findEncryptedMessage" resultType="hashMap" parameterType="java.util.Map">
+    select EncryptedMessage from license 
+    </select>
+
+    <select id="findSecurityQuestions" resultType="hashMap">
+        SELECT id, question as securityQuestion FROM security_question
+    </select>
+</mapper>

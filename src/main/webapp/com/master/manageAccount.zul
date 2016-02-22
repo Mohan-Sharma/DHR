@@ -1,0 +1,182 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <style src="/css/mainCSS.css"/>
+    <style>
+        .z-tabpanel, .z-tabbox-ver .z-tabpanel-ver {
+            padding: 0;
+        }
+    </style>
+    <window id="doctorWin"
+            self="@{define(content)}" apply="org.zkoss.bind.BindComposer" viewModel="@id('vm') @init('com.master.view.ManageDoctorAccountVm')">
+
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;" align="center">
+                Manage Account
+            </n:h3>
+        </div>
+        <tabbox>
+            <tabs hflex="1" style="border: 1px solid black">
+                <tab label="Manage Demographic Details" />
+                <tab label="Manage Password" />
+                <tab label="Manage Security" />
+            </tabs>
+            <tabpanels>
+                <tabpanel>
+                    <window id="manageDemographicDetails">
+                        <caption label="View Doctors Demographic Details"/>
+                        <grid>
+                            <rows>
+                                <row>
+                                    <cell width="20%">First Name<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox width="70%" id="firstName" value="@save(vm.doctorDto.firstName, before='updateDemographicDetails') @load(vm.doctorDto.firstName)" constraint="no empty:*Required"/></cell>
+                                    <cell width="20%">Last Name<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox width="70%" id="lastName" value="@save(vm.doctorDto.lastName, before='updateDemographicDetails') @load(vm.doctorDto.lastName)" constraint="no empty:*Required"/></cell>
+                                </row>
+                                <row>
+                                    <cell width="20%" >Email ID<label value="*" style="color: #ff0000"/> :</cell><cell width="30%" ><textbox width="70%"  id="emailId" constraint="/.+@.+\.[a-z]+/: Required" value="@save(vm.doctorDto.emailId, before='updateDemographicDetails') @load(vm.doctorDto.emailId)"/></cell>
+                                    <cell width="20%" >Mobile Number<label value="*" style="color: #ff0000"/> :</cell><cell width="35%"><textbox width="70%"  constraint="no empty,/^[0-9]{10,10}$/:*Required 10 Digits" id="phoneNo" value="@save(vm.doctorDto.phoneNumber, before='updateDemographicDetails') @load(vm.doctorDto.phoneNumber)" maxlength="10"/></cell>
+                                </row>
+                                <row>
+                                    <cell>Gender :</cell>
+                                    <cell>
+                                        <radiogroup selectedItem="@bind(vm.doctorDto.gender)">
+                                            <radio label="Male" value="male"/>
+                                            <radio label="Female" value="female" style="margin-left: 20px"/>
+                                        </radiogroup>
+                                    </cell>
+                                    <cell>Departments<label value="*" style="color: #ff0000"/> :<label value="@bind(vmsgs['selectedDepartments'])" style="color: red;" /></cell>
+                                    <cell width="200px" height="100px">
+                                        <listbox multiple="true" selectedItems="@save(vm.doctorDto.selectedDepartments, before='updateDemographicDetails')" model="@load(vm.departments)"
+                                                 vflex="true" mold="select" width="200px" height="100px"
+                                                 style="font: 12px Tahoma, Arial, Sans-serif; margin-top: 5px; align-items: center" id="departmentListbox">
+                                            <template name="model" var="row" sort="auto">
+                                                <listitem  label="${row.departmentName}" onCreate="@command('checkSelectedDepartments', listItem=self)" onBlur="@command('selectedDepartment', listItem=self)"/>
+                                            </template>
+                                        </listbox>
+                                    </cell>
+                                </row>
+                                <row>
+                                    <button label="Update" onClick="@command('updateDemographicDetails', doctorDto = vm.doctorDto)" sclass="btn-success" style="margin-left: 10px;"></button>
+                                </row>
+                            </rows>
+                        </grid>
+                    </window>
+                </tabpanel>
+                <tabpanel vflex="1">
+                    <tabbox>
+                        <tabs>
+                            <tab>Change Account Password</tab>
+                            <tab>Change PDF Access Password</tab>
+                        </tabs>
+                        <tabpanels>
+                            <tabpanel>
+                                <window id="manageAccountPassword" vflex="1">
+                                    <caption label="Change Account Password"/>
+                                    <grid vflex="1">
+                                        <rows>
+                                            <row>
+                                                <cell width="20%">Current Password<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox type="password" width="48%" id="oldAccntPassword" value="@save(vm.modelMap.oldPassword, before='updateAccountPassword')" constraint="no empty:Required"/></cell>
+                                            </row>
+                                            <row>
+                                                <cell width="20%">New Password<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox type="password" width="48%" id="newAccntPassword" value="@save(vm.modelMap.newPassword, before='updateAccountPassword')" constraint="no empty:Required"/></cell>
+                                            </row>
+                                            <row>
+                                                <cell width="20%" >Confirm Password<label value="*" style="color: #ff0000"/> :</cell><cell width="30%" ><textbox type="password" width="48%"  id="confirmAccntPassword" value="@save(vm.modelMap.confirmPassword, before='updateAccountPassword')" constraint="no empty:Required"/></cell>
+                                            </row>
+                                            <!--<row>
+                                                <cell width="20%">Security Question<label value="*" style="color: #ff0000"/> :</cell>
+                                                <cell width="30%" >
+                                                    <combobox model="@load(vm.securityQuestions)" selectedItem="@save(vm.modelMap.selectedSecurityQuestion, before='updateAccountPassword')" constraint="no empty:Required" width="50%">
+                                                        <template name="model" var="question">
+                                                            <comboitem label="${question.securityQuestion}"/>
+                                                        </template>
+                                                    </combobox>
+                                                </cell>
+                                            </row>
+                                            <row>
+                                                <cell width="20%" >Answer<label value="*" style="color: #ff0000"/> :</cell><cell width="30%" ><textbox  id="selectedAccntAnswer" width="48%" value="@save(vm.modelMap.selectedAnswer, before='updateAccountPassword')" constraint="no empty:*Required"/></cell>
+                                            </row>-->
+                                            <row>
+                                                <cell>
+                                                    <button label="Change Password" sclass="btn-success" onClick="@command('updateAccountPassword')" style="margin-left: 10px;"></button>
+                                                    <!--<button label="Forgot Password" sclass="btn-primary" style="margin-left: 10px;"></button>-->
+                                                </cell>
+                                            </row>
+                                        </rows>
+                                    </grid>
+                                </window>
+                            </tabpanel>
+                            <tabpanel>
+                                <window id="managePassword" vflex="1">
+                                    <caption label="Change PDF Access Password"/>
+                                    <grid vflex="1">
+                                        <rows>
+                                            <row>
+                                                <cell width="20%">New Password<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox type="password" width="48%" id="oldPassword" value="@save(vm.modelMap.oldPassword, before='updateAdditionalPassword')" constraint="no empty:Required"/></cell>
+                                            </row>
+                                            <row>
+                                                <cell width="20%">New Password<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox type="password" width="48%" id="newPassword" value="@save(vm.modelMap.newPassword, before='updateAdditionalPassword')" constraint="no empty:Required"/></cell>
+                                            </row>
+                                            <row>
+                                                <cell width="20%" >Confirm Password<label value="*" style="color: #ff0000"/> :</cell><cell width="30%" ><textbox type="password" width="48%"  id="confirmPassword" value="@save(vm.modelMap.confirmPassword, before='updateAdditionalPassword')" constraint="no empty:Required"/></cell>
+                                            </row>
+                                            <!--<row>
+                                                <cell width="20%">Security Question<label value="*" style="color: #ff0000"/> :</cell>
+                                                <cell width="30%" >
+                                                    <combobox model="@load(vm.securityQuestions)" selectedItem="@save(vm.modelMap.selectedSecurityQuestion, before='updateAdditionalPassword')" constraint="no empty:Required" width="50%">
+                                                        <template name="model" var="question">
+                                                            <comboitem label="${question.securityQuestion}"/>
+                                                        </template>
+                                                    </combobox>
+                                                </cell>
+                                            </row>
+                                            <row>
+                                                <cell width="20%" >Answer<label value="*" style="color: #ff0000"/> :</cell><cell width="30%" ><textbox  id="selectedAnswer" width="48%" value="@save(vm.modelMap.selectedAnswer, before='updateAdditionalPassword')" constraint="no empty:*Required"/></cell>
+                                            </row>-->
+                                            <row>
+                                                <cell>
+                                                    <button label="Change Password" sclass="btn-success" onClick="@command('updateAdditionalPassword')" style="margin-left: 10px;"></button>
+                                                    <!--<button label="Forgot Password" sclass="btn-primary" style="margin-left: 10px;"></button>-->
+                                                </cell>
+                                            </row>
+                                        </rows>
+                                    </grid>
+                                </window>
+                            </tabpanel>
+                        </tabpanels>
+                    </tabbox>
+                </tabpanel>
+                <tabpanel>
+                    <window id="manageSecurity">
+                        <caption label="Manage Security"/>
+                        <grid>
+                            <rows>
+                                <row>
+                                    <cell width="20%">Security Question<label value="*" style="color: #ff0000"/> :</cell>
+                                    <cell width="30%" >
+                                        <combobox model="@load(vm.securityQuestions)" selectedItem="@save(vm.selectedQuestion, before='updateSecurityQuestion')" constraint="no empty:Required" width="50%">
+                                            <template name="model" var="question">
+                                                <comboitem label="${question.securityQuestion}"/>
+                                            </template>
+                                        </combobox>
+                                    </cell>
+                                </row>
+                                <row>
+                                    <cell width="20%" >Answer<label value="*" style="color: #ff0000"/> :</cell><cell width="30%" ><textbox  width="48%" value="@save(vm.answer, before='updateSecurityQuestion')" constraint="no empty:*Required"/></cell>
+                                </row>
+                                <row>
+                                    <button label="Update" onClick="@command('updateSecurityQuestion')" sclass="btn-success" style="margin-left: 10px;"></button>
+                                </row>
+                            </rows>
+                        </grid>
+                    </window>
+                </tabpanel>
+            </tabpanels>
+        </tabbox>
+    </window>
+</zk>

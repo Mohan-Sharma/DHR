@@ -1,0 +1,43 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <style src="/css/mainCSS.css"/>
+    <zscript><![CDATA[
+                menu1.setSclass("active");
+            ]]></zscript>
+    <window id="viewDoctorWin" border="none"
+            self="@{define(content)}">
+
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;">
+                Timeline
+            </n:h3>
+            <h:div id="searchBox">
+                <h:div id="searchBox_inner">
+                    <div zclass="container-fluid">
+                        <h:div id="patient">
+                            <h:h5>Progress Notes</h:h5>
+                            <h:div id="patient_body">
+                                <div zclass="row-fluid">
+                                    <div sclass="span3">
+                                        <label value="Patient MRN#" style="font-weight:bold"/>
+                                        <textbox sclass="span12" value=""/>
+                                    </div>
+                                </div>
+                                <div zclass="form-actions">
+                                        <button sclass="btn-success">Run</button>
+                                </div>
+                            </h:div>
+                        </h:div>
+                    </div>
+                </h:div>
+             </h:div>
+        </div>
+    </window>
+</zk>

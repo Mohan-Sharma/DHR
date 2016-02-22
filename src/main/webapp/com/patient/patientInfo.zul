@@ -1,0 +1,34 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <zscript>
+        pagetitle.setValue("Digitized Health Records -- DHR");
+        subpagetitle.setValue("Viewing Admission Details ");
+    </zscript>
+    <div apply="org.zkoss.bind.BindComposer"
+         viewModel="@id('patientDetailsViewModel') @init('com.patientadmission.presentation.PatientDetailsViewModel')">
+        <n:table style="margin:5px;width:100%">
+            <n:tr>
+                <n:td style="text-align:center;">
+                    <label value="MRN Number : " style="font-weight:bold"/>
+                    <label value="@bind(patientDetailsViewModel.patientDetailsMap.medicalRecordNumber)"/>
+                </n:td>
+                <n:td style="text-align:center">
+                    <label value="First Name : " style="font-weight:bold"/>
+                    <label value="@bind(patientDetailsViewModel.patientDetailsMap.first_name)"/>
+                </n:td>
+                <n:td style="text-align:center">
+                    <label value="Middle Name : " style="font-weight:bold"/>
+                    <label value="@bind(patientDetailsViewModel.patientDetailsMap.middle_name)"/>
+                </n:td>
+                <n:td style="text-align:center">
+                    <label value="Last Name : " style="font-weight:bold"/>
+                    <label value="@bind(patientDetailsViewModel.patientDetailsMap.last_name)"/>
+                </n:td>
+            </n:tr>
+        </n:table>
+    </div>
+</zk>

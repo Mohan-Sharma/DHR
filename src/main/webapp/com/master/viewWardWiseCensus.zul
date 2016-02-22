@@ -1,0 +1,110 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+	xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+	<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+	<window id="viewDiseaseIndex" border="none"
+		self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('WardWiseCensusViewModel') @init('com.patientadmission.presentation.WardWiseCensusViewModel')">
+		<div style="border:1px solid #EEEEEE">
+			<n:h3 style="background-color: #EEEEEE;">
+				Ward Wise Census 
+			</n:h3>
+			<h:div id="searchBox">
+				<h:div id="searchBox_inner">
+					<div zclass="container-fluid">
+						<h:div id="patient">
+							<h:div id="admission_body">
+								<div zclass="row-fluid">
+									<div sclass="span3">
+										<label
+											value="Date From" style="font-weight:bold" />
+										<datebox sclass="span12"
+											format="dd/MM/yyyy"
+											value="@bind(WardWiseCensusViewModel.admissionDate)"
+											placeholder="dd/MM/yyyy" />
+									</div>
+									<div sclass="span3">
+										<label value="Date To"
+											style="font-weight:bold" />
+										<datebox sclass="span12"
+											format="dd/MM/yyyy"
+											value="@bind(WardWiseCensusViewModel.admissionDateThru)"
+											placeholder="dd/MM/yyyy" />
+									</div>
+									<div>
+										<div zclass="span3">
+											<label
+												value="Ward" style="font-weight:bold" />
+											<combobox sclass="span12"
+												model="@bind(WardWiseCensusViewModel.wards)"
+												constraint="no empty" readonly="true"
+												selectedItem="@load(WardWiseCensusViewModel.selectedWard) @save(WardWiseCensusViewModel.selectedWard,after='selectWard')"
+												onSelect="@command('selectWard')">
+												<template name="model"
+													var="ward">
+													<comboitem
+														label="@load(ward.name)" />
+												</template>
+											</combobox>
+										</div>
+									</div>
+								</div>
+							</h:div>
+						</h:div>
+					</div>
+				</h:div>
+			</h:div>
+			<h:br />
+			<div sclass="panelFoot">
+				<button label="Search" sclass="btn-primary"
+					onClick="@command('search')" />
+				<button label="Reset"
+					onClick="Executions.getCurrent().sendRedirect(null);" sclass="btn-danger"/>
+			</div>
+			<h:br />
+			<h:br />
+			<grid model="@load(WardWiseCensusViewModel.maps)"
+				id="singleModel" visible="true" mold="paging" pageSize="10">
+				<auxhead>
+					<auxheader >
+						<n:h5>
+							Ward
+						</n:h5>
+					</auxheader>
+					<auxheader  colspan="2" >
+						<n:h5>
+							Admitted
+						</n:h5>
+					</auxheader >
+					<auxheader colspan="2" >
+						<n:h5>
+							Discharged
+						</n:h5>
+					</auxheader>
+				</auxhead>
+				<columns >
+					<column label="" width="20%"></column>
+					<column label="Male" ></column>
+					<column label="Female" ></column>
+					<column label="Male"  />
+					<column label="Female" />
+				</columns>
+				<template name="model" var="detail">
+					<row value="@bind(detail)">
+						<label value="@bind(detail.WARDNAME)" />
+						<label value="@bind(detail.ADMISSION_MALE)" />
+						<label value="@bind(detail.ADMISSION_FEMALE)" />
+						<label value="@bind(detail.DISCHARGE_MALE)" />
+						<label value="@bind(detail.DISCHARGE_FEMALE)" />
+					</row>
+				</template>
+			</grid> 
+		</div>
+	</window>
+</zk>

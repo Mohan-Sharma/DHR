@@ -1,0 +1,185 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <window id="procedureSearchWindow" border="none"
+            self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('pivm') @init('com.patientadmission.presentation.ProcedureIndexViewModel')">
+        <custom-attributes org.zkoss.zul.grid.rod="true" />
+
+        <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;" align="center">
+                Procedure Index
+            </n:h3>
+            <h:div id="searchBox">
+                <h:div id="searchBox_inner">
+                    <div zclass="container-fluid">
+                        <h:div id="patient">
+
+                            <h:div id="admission_body">
+                                <div zclass="row-fluid">
+                                    <div sclass="span3 ">
+                                        <label
+                                                value="Admission Date From" style="font-weight:bold" />
+                                        <datebox sclass="span12"
+                                                 format="dd/MM/yyyy" value="@bind(pivm.admissionDate)"
+                                                 placeholder="dd/MM/yyyy" />
+                                    </div>
+                                    <div sclass="span3">
+                                        <label value="Admission Date To"
+                                               style="font-weight:bold" />
+                                        <datebox sclass="span12"
+                                                 format="dd/MM/yyyy" value="@bind(pivm.admissionDateThru)"
+                                                 placeholder="dd/MM/yyyy" />
+                                    </div>
+                                    <div>
+                                        <div sclass="span2">
+                                            <label value="Gender"
+                                                   style="font-weight:bold" />
+                                            <listbox id="genderListBox"
+                                                     mold="select" sclass="span12"
+                                                     onSelect="@command('selectGender',content=self.getSelectedItem().getValue())">
+                                                <listitem label="All"
+                                                          selected="true" />
+                                                <listitem label="MALE"
+                                                          value="MALE" />
+                                                <listitem label="FEMALE"
+                                                          value="FEMALE" />
+                                            </listbox>
+                                        </div>
+                                    </div>
+                                    <div sclass="span4">
+                                        <label value="Age (in years)"
+                                               style="font-weight:bold" />
+                                        <div sclass="span12">
+                                            <listbox id="ageListBox"
+                                                     mold="select" sclass="span4"
+                                                     onSelect="@command('selectCondition',item=self.selectedItem.value)">
+                                                <listitem
+                                                        label="Less Than" selected="true" value="Less Than" />
+                                                <listitem
+                                                        label="Equal To" value="Equal To" />
+                                                <listitem
+                                                        label="Greater Than" value="Greater Than" />
+                                                <listitem
+                                                        label="In Between" value="In Between" />
+                                            </listbox>
+                                            <intbox
+                                                    value="@bind(pivm.age)" sclass="span2" />
+                                            <intbox sclass="span2"
+                                                    visible="false" value="@bind(pivm.thruAge)" id="thruAgeBox" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </h:div>
+                            <h:div id="patient_body">
+                                <div zclass="row-fluid">
+                                    <label value="Procedures Done"
+                                        sclass="span3" style="font-weight:bold" />
+                                    <div sclass="input-append span12"
+                                        style="margin-left:5px;">
+                                        <textbox id="procedureDoneTextBox" sclass="span6" height="24px"/>
+                                    </div>
+                                </div>
+                                <!--<div visible="@bind(pivm.displayProcedureListDiv)">
+                                    <hbox style="margin-left: 63%">
+                                        <textbox value="@bind(pivm.keyword)" width="205px" placeholder="Search Procedure" vflex="1" style="border: 1px solid #000000"/>
+                                        <button label="Search" image="/images/search.png" onClick="@command('searchCpt')" sclass="btn btn-mini btn-success"/>
+                                        <button label="Clear" image="/images/button-cancel-2.ico" onClick="@command('clearKeyword')" sclass="btn btn-mini btn-danger"/>
+                                    </hbox>
+                                    <grid model="@load(pivm.allCpts)" mold="paging" pageSize="5">
+                                        <columns menupopup="auto">
+                                            <column label="Code" width="10%" align="center"></column>
+                                            <column label="Description" align="center"></column>
+                                        </columns>
+                                        <template name="model" var="cpt">
+                                            <row onClick="@command('clicked', cpt = cpt)"  tooltiptext="click to select">
+                                                <label value="${cpt.code}"/>
+                                                <label value="${cpt.description}"/>
+                                            </row>
+                                        </template>
+                                    </grid>
+                                    <label value="*click on procedure to select one" style="color: #ff0000; font-style: italic"/>
+                                </div>-->
+                                <!--<div>
+                                    <combobox model="@load(pivm.allCpts)" width="400px" mold="rounded" >
+                                        <template name="model" var="cpt">
+                                            <comboitem label="${cpt.description}"/>
+                                        </template>
+                                    </combobox>
+                                </div>-->
+                                <!--<div visible="@bind(pivm.displayProcedureSelectedDiv)">
+                                    <label value="Selected Procedure"/>
+                                    <label value="@load(pivm.selectedProcedure.description)"/>
+                                </div>-->
+                            </h:div>
+                        </h:div>
+                    </div>
+                </h:div>
+            </h:div>
+            <h:br />
+            <div sclass="panelFoot">
+                <button label="Search" sclass="btn-success"
+                        onClick="@command('search',minPage=0 ,maxPage=10 )" />
+                <button label="Reset"
+                        onClick="Executions.getCurrent().sendRedirect(null);" sclass="btn-danger"/>
+            </div>
+            <h:br />
+            <h:br />
+            <n:h6>
+                Click on the IP Number to View the Case Sheet
+            </n:h6>
+            <grid id="viewDoctorsListBox" model="@load(pivm.maps)"
+                  mold="paging">
+
+                <columns menupopup="auto">
+                    <column label="MR Number" align="center" width="11%"></column>
+                    <column label="IP Number" align="center" width="11%"></column>
+                    <column label="Procedure Code" visible="false"></column>
+                    <column label="Procedure Description" align="center"></column>
+                    <column label="Patient Name" align="center" width="18%"></column>
+                    <column label="Age/Sex" align="center" width="13%"/>
+                    <column label="Admitting Date/Time" visible="false" />
+                    <column label="Discharge Date/Time" visible="false" />
+                    <column label="Department" align="center" width="11%"/>
+                </columns>
+                <template name="model" var="detail">
+                    <row>
+                        <label value="${detail.MEDICAL_RECORD_NUMBER}" />
+                        <a label = "${detail.INPATIENT_NUMBER}" onClick="@command('openFileViewer',content=detail.INPATIENT_NUMBER)"/>
+                        <label value="${detail.MainID3}" />
+                        <label value="${detail.TEXT}" />
+                        <cell>
+                            <label value="${detail.FIRST_NAME}" />
+                            <label value="${detail.LAST_NAME}" />
+                        </cell>
+                        <cell>
+                            <label
+                                    onCreate="@command('calulateAge',dob=detail.DOB,label=self)" />
+                            <label value="/" />
+                            <label value="${detail.GENDER}" />
+                        </cell>
+                        <label value="${detail.FROM_DATE}" />
+                        <label value="${detail.THRU_DATE}" />
+                        <label
+                                onCreate="@command('displayDepartmentName',map=detail,label1=self)" />
+                    </row>
+                </template>
+
+            </grid>
+            <!--<paging id="pagingComp"  visible="false" autohide="true"  detailed="true"
+                    onCreate="@command('attachPagingEventListner')">
+            </paging>-->
+
+        </div>
+        <vbox>
+
+        </vbox>
+    </window>
+
+</zk>

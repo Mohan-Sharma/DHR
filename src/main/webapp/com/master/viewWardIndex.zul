@@ -1,0 +1,179 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+ 
+    <window id="viewDiseaseIndex" border="none"
+            self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('WardIndexViewModel') @init('com.patientadmission.presentation.WardIndexViewModel')">
+
+        <div style="border:1px solid #EEEEEE" align="center">
+            <n:h3 style="background-color: #EEEEEE;">
+                Ward Index
+            </n:h3>
+        <h:div id="searchBox">
+            <h:div id="searchBox_inner">
+                <div zclass="container-fluid">
+                    <h:div id="patient">
+                            
+                        <h:div id="admission_body">
+                            <div zclass="row-fluid">
+                                <div sclass="span3">
+                                    <label value="Admission Date From" style="font-weight:bold"/>
+                                    <datebox sclass="span12" format="dd/MM/yyyy" value="@bind(WardIndexViewModel.admissionDate)"
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                                <div sclass="span3">
+                                    <label value="Admission Date To" style="font-weight:bold"/>
+                                    <datebox sclass="span12"  format="dd/MM/yyyy" value="@bind(WardIndexViewModel.admissionDateThru)" 
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                                <div>
+	                                <div sclass="span2">
+	                                    <label value="Gender" style="font-weight:bold"/>
+	                                    <listbox id="genderListBox" mold="select" sclass="span12" onSelect="@command('selectGender',content=self.getSelectedItem().getValue())">
+	                                        <listitem label="All" selected="true"/>
+	                                        <listitem label="MALE" value="MALE"/>
+	                                        <listitem label="FEMALE" value="FEMALE"/>
+	                                    </listbox>
+	                                </div>
+                                    <div sclass="span4">
+                                        <label value="Age (in years)" style="font-weight:bold"/>
+                                        <div sclass="span12">
+                                            <listbox id="ageListBox" mold="select"  sclass="span5"
+                                                     onSelect="@command('selectCondition',item=self.selectedItem.value)">
+                                                <listitem label="Less Than" selected="true" value="Less Than"/>
+                                                <listitem label="Equal To" value="Equal To"/>
+                                                <listitem label="Greater Than" value="Greater Than"/>
+                                                <listitem label="In Between" value="In Between"/>
+                                            </listbox>
+                                            <intbox value="@bind(WardIndexViewModel.age)" sclass="span2" />
+                                            <intbox sclass="span2"
+                                                    visible="false" value="@bind(WardIndexViewModel.thruAge)" id="thruAgeBox" />
+                                        </div>
+                                    </div>
+	                            </div>
+                            </div>
+                        </h:div>
+                        <h:div id="patient_body">
+                            <div zclass="row-fluid">
+                                 <div zclass="span3">
+				                    <label value="Admitted Ward" style="font-weight:bold"/> 
+				                   <combobox sclass="span12"
+												model="@bind(WardIndexViewModel.wards)"
+												constraint="no empty" readonly="true"
+												selectedItem="@save(WardIndexViewModel.selectedWard)">
+												<template name="model"
+													var="selectedWard">
+													<comboitem
+														label="@load(selectedWard.wardName)" />
+												</template>
+											</combobox>
+				                 </div>
+                            </div>
+                        </h:div>
+                    </h:div>
+                </div>
+            </h:div>
+        </h:div>
+        <h:br/>
+        <div sclass="panelFoot">
+            <button label="Search" sclass="btn-success" onClick="@command('search')"/>
+            <button label="Reset" sclass="btn-danger" onClick="Executions.getCurrent().sendRedirect(null);"/>
+        </div>
+        <h:br/>
+        <h:br/>
+        <n:h6>
+					Click on the IP Number to View the Case Sheet
+		</n:h6>
+          <grid model="@load(WardIndexViewModel.maps)" id="singleModel" visible="true" mold="paging"
+              pageSize="10">
+            <!--<auxhead>
+                <auxheader >
+                    <label id="patientCountLabel"/>
+                </auxheader>
+            </auxhead>-->
+            <columns menupopup="auto">
+                <column label="MR Number" width="12%" align="center"></column>
+                <column label="IP Number" width="12%" align="center"></column>
+                <column label="Ward" width="12%" align="center"/>
+                <column label="Patient Name" width="18%" align="center"></column>
+                <column label="Age/Sex" width="15%" align="center"/>
+                <column label="Admitting Date/Time" align="center"/>
+                <column label="Discharge Date/Time" align="center"/>
+            </columns>
+            <template name="model" var="detail">
+                <row value="@bind(detail)">
+                    <label value="@bind(detail.MEDICAL_RECORD_NUMBER)"/>
+                    <a label="@bind(detail.INPATIENT_NUMBER)" onClick="@command('openFileViewer',content=detail.INPATIENT_NUMBER)"/>
+                    <label onCreate="@command('displayWardName',map=detail,label1=self)"/>
+                    <hlayout>
+	                    <label value="@bind(detail.FIRST_NAME)"/>
+	                    <label value="@bind(detail.LAST_NAME)"/>
+                    </hlayout>
+                    <hlayout>
+					<label	onCreate="@command('calulateAge',dob=detail.DOB,label=self)" />/<label value="@bind(detail.GENDER)"/>
+					</hlayout>
+                    <label value="@bind(detail.FROM_DATE)"/>
+                    <label value="@bind(detail.THRU_DATE)"/>
+              
+                </row>
+            </template>
+        </grid>  
+		 <grid  model="@load(WardIndexViewModel.maps)" id="multipleModel"   visible="false" mold="paging" 
+		              pageSize="1">
+		            <!--<auxhead>
+		                <auxheader colspan="3" >
+		                    <label id="patientCountLabelmultiple" />
+		                </auxheader>
+		            </auxhead>-->
+					<columns menupopup="auto">
+				        <column label="Ward Name" width="10%" align="center"/>
+				        <column label="No Of Record" width="12%" align="center"/>
+				        <column label="Details " align="center" />
+				    </columns>
+			        <template name="model"  var="detail"  >
+			            <row>
+			                <label value="@bind(detail.WARD_NAME)" />
+			                <label value="@bind(detail.SIZE)" />
+			                <hlayout>
+			                	<grid model="@bind(detail.WARD_LIST)" mold="paging" pageSize="3" >
+			                		 <columns menupopup="auto">
+						                <column label="MR Number" width="11%" align="center"></column>
+						                <column label="IP Number" width="11%" align="center"></column>
+						                <column label="Patient Name" width="16%" align="center"></column>
+						                <column label="Age/Sex" width="17%" align="center"/>
+						                <column label="Admitting Date/Time" align="center"/>
+						                <column label="Discharge Date/Time" align="center" />
+						            </columns>
+			                		<template name="model" 
+			                			var="detail1">
+			                			<row value="@bind(detail1)">
+			                					<label value="@bind(detail1.MEDICAL_RECORD_NUMBER)"/>
+							                    <a label="@bind(detail1.INPATIENT_NUMBER)" onClick="@command('openFileViewer',content=detail1.INPATIENT_NUMBER)"/>
+							                    <hlayout>
+								                    <label value="@bind(detail1.FIRST_NAME)"/>
+								                    <label value="@bind(detail1.LAST_NAME)"/>
+							                    </hlayout>
+							                    <hlayout>
+												<label	onCreate="@command('calulateAge',dob=detail1.DOB,label=self)" />/<label value="@bind(detail1.GENDER)"/>
+												</hlayout>
+							                    <label value="@bind(detail1.FROM_DATE)"/>
+							                    <label value="@bind(detail1.THRU_DATE)"/>
+			                			</row>
+			                		</template>
+			                	</grid>
+			                </hlayout>
+			                
+			            </row>
+			        </template> 
+		       </grid>  
+		       
+	        </div>
+    </window>
+</zk>

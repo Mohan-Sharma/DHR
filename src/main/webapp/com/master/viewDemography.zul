@@ -1,0 +1,187 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <window id="viewDoctorWin" border="none"
+            self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('pdvm') @init('com.patientadmission.presentation.PatientDemographyViewModel')">
+		       <div style="border:1px solid #EEEEEE">
+            <n:h3 style="background-color: #EEEEEE;" align="center">
+                Global Search
+            </n:h3>
+            <div class="breadcrumb">
+		
+			<div id="breadCrunmId"  /> 
+			</div>
+	<separator bar="true" />
+        <h:div id="searchBox">
+            <h:div id="searchBox_inner">
+                <div zclass="container-fluid">
+                    <h:div id="patient">
+                            <h:h5>Patient</h:h5>
+                        <h:div id="patient_body">
+                            <div zclass="row-fluid">
+                                <div sclass="span3">
+                                    <label value="First Name" style="font-weight:bold"/>
+                                    <textbox sclass="span12" value="@bind(pdvm.firstName)"/>
+                                </div>
+                                <div sclass="span3">
+                                    <label value="Last Name" style="font-weight:bold"/>
+                                    <textbox sclass="span12" value="@bind(pdvm.lastName)"/>
+                                </div>
+                                <div sclass="span3">
+                                    <label value="Age (in years)" style="font-weight:bold"/>
+                                    <div sclass="span12">
+                                        <listbox id="ageListBox" mold="select"  sclass="span6" style="margin-top:1px" height="23px"
+                                                 onSelect="@command('selectCondition',item=self.selectedItem.value)">
+                                            <listitem label="Less Than" selected="true" value="Less Than"/>
+                                            <listitem label="Equal To" value="Equal To"/>
+                                            <listitem label="Greater Than" value="Greater Than"/>
+                                            <listitem label="In Between" value="In Between"/>
+                                        </listbox>
+                                        <intbox value="@bind(pdvm.age)" sclass="span4" style="margin-top:0px"/>
+                                    </div>
+                                </div>
+                                
+                                <div sclass="span3">
+                                    <separator orient="vertical"/>
+                                    <div sclass="span12">
+                                        <intbox  sclass="span4" visible="false" value="@bind(pdvm.thruAge)" id="thruAgeBox"/>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div zclass="row-fluid">
+                                <div sclass="span3">
+                                    <label value="MR Number" style="font-weight:bold"/>
+                                    <textbox sclass="span12" value="@bind(pdvm.mrnNumber)"/>
+                                </div>
+                                <div sclass="span3">
+                                    <label value="IP Number" style="font-weight:bold"/>
+                                    <textbox sclass="span12" value="@bind(pdvm.inPatientNumber)"/>
+                                </div>
+                                <div sclass="span3"  style="margin-left:30px">
+                                    <label value="Gender" style="font-weight:bold"/>
+                                    <listbox id="genderListBox" mold="select" height="22px" onSelect="@command('selectGender',content=self.getSelectedItem().getValue())"
+                                            sclass="span12">
+                                        <listitem label="" selected="true"/>
+                                        <listitem label="MALE" value="MALE"/>
+                                        <listitem label="FEMALE" value="FEMALE"/>
+                                    </listbox>
+                                </div>
+                            </div>
+                        </h:div>
+                    </h:div>
+                    <separator bar="true"></separator>
+                    <h:div id="admission">
+                        <n:section>
+                            <h:i class="" onclick="javascript:jq('#admission_body').toggleClass('hide')">Admission</h:i>
+                        </n:section>
+                        <h:div id="admission_body">
+                            <div zclass="row-fluid">
+                                <div sclass="span3">
+                                    <label value="Admission Date From" style="font-weight:bold"/>
+                                    <datebox sclass="span12" value="@bind(pdvm.admissionDate)" format="dd/MM/yyyy"
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                                <div sclass="span3">
+                                    <label value="Admission Date To" style="font-weight:bold"/>
+                                    <datebox sclass="span12" value="@bind(pdvm.admissionDateThru)" format="dd/MM/yyyy"
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                                <div sclass="span3">
+                                    <label value="Discharge Date From" style="font-weight:bold"/>
+                                    <datebox sclass="span12" value="@bind(pdvm.dischargeDate)" format="dd/MM/yyyy"
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                                <div sclass="span3">
+                                    <label value="Discharge Date To" style="font-weight:bold"/>
+                                    <datebox sclass="span12" value="@bind(pdvm.dischargeDateThru)" format="dd/MM/yyyy"
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                            </div>
+                        </h:div>
+                    </h:div>
+                    <h:div id="clinical">
+                        <n:pre style="cursor: pointer"
+                             onclick="javascript:jq('#clinical_body').toggleClass('hide')">Search by Clinical Data</n:pre>
+                        <h:div id="clinical_body" class="hide">
+                        
+                            <div zclass="row-fluid">
+	                            <label value="Admitting Diagnosis" sclass="span2" style="margin:5px;font-weight:bold" />
+                                <div sclass="input-append span12"  style="margin:5px">
+                                    <textbox readonly="true" id="admissionDianosisTextBox"  sclass="span8"  height="24px"/>
+    							    <button sclass="btn btn-mini btn-success" type="button" onClick="@command('addAdmittingDiagnosis')">Search</button>
+	    						    <button sclass="btn btn-mini btn-danger" type="button" onClick="@command('resetAdmissionDiagnosis')">Reset</button>
+                                </div>
+						    </div>
+
+                            <div zclass="row-fluid" >
+	                            <label value="Discharge Diagnosis" sclass="span2" style="margin:5px;font-weight:bold" />
+                                <div sclass="input-append span12"  style="margin:5px">
+                                    <textbox readonly="true" id="dischargeDiagnosisTextBox"  sclass="span8"  height="24px"/>
+					        		<button sclass="btn btn-mini btn-success" type="button" onClick="@command('addDischargeDiagnosis')">Search</button>
+							        <button sclass="btn btn-mini btn-danger" type="button" onClick="@command('resetDischargeDiagnosis')">Reset</button>
+                                </div>
+                            </div>
+
+                            <div zclass="row-fluid" >
+	                            <label value="Final Diagnosis"  sclass="span2" style="margin:5px;font-weight:bold" />
+                                <div sclass="input-append span12"  style="margin:5px">
+                                    <textbox readonly="true" id="finalDiagnosisTextBox"  sclass="span8"  height="24px"/>
+		    					    <button sclass="btn btn-mini btn-success" type="button" onClick="@command('addFinalDiagnosis')">Search</button>
+			    				    <button sclass="btn btn-mini btn-danger" type="button" onClick="@command('resetFinalDiagnosis')">Reset</button>
+                                </div>
+						    </div>
+
+                            <div zclass="row-fluid" >
+	                            <label value="Procedures Done" sclass="span2" style="margin:5px;font-weight:bold" />
+                                <div sclass="input-append span12" style="margin:5px">
+                                    <textbox readonly="true" id="procedureDoneTextBox"  sclass="span8" height="24px"/>
+		    					    <button sclass="btn btn-mini btn-success" type="button" onClick="@command('addProcedureDone')">Search</button>
+			    				    <button sclass="btn btn-mini btn-danger" type="button" onClick="@command('resetProcedure')">Reset</button>
+                                </div>
+						    </div>
+                        </h:div>
+                    </h:div>
+                </div>
+            </h:div>
+        </h:div>
+        <h:br/>
+        <div sclass="panelFoot">
+         	 <button label="Search" sclass="btn-success"	onClick="@command('search',minPage=0 ,maxPage=10 )"/>
+            <button label="Reset"  sclass="btn-danger" onClick="Executions.getCurrent().sendRedirect(null);"/>
+        </div>
+        <h:br/>
+        <h:br/>
+        <n:h6>
+					Click on the IP Number to View the Case Sheet
+		</n:h6>
+        <grid id="viewDoctorsListBox" model="@load(pdvm.maps)" mold="paging"
+              pageSize="10">
+            <columns>
+                <column label="MR Number"  width="18%" align="center"></column>
+                <column label="IP Number" width="18%" align="center"></column>
+                <column label="Admission Date &amp; Time" align="center"></column>
+                <column label="Discharge Date &amp; Time" align="center"></column>
+            </columns>
+            <template name="model" var="detail">
+                <row value="@bind(detail)">
+                    <label value="@bind(detail.MEDICAL_RECORD_NUMBER)"/>
+                    <a label="@bind(detail.INPATIENT_NUMBER)" onClick="@command('openFileViewer',content=detail.INPATIENT_NUMBER)"/>
+                    <label value="@bind(detail.FROM_DATE)@converter('formatedDate', format='dd/MM/yyyy HH:mm a')"/>
+                    <label value="@bind(detail.THRU_DATE)@converter('formatedDate', format='dd/MM/yyyy HH:mm a')"/>
+                </row>
+            </template>
+        </grid>
+        <paging id="Paging" onCreate="@command('attachPagingEventListner')"  detailed="true" visible="false"  />
+        <label style="font-weight:bold" visible="false" id="patientCountLabel"/>
+        </div>
+    </window>
+
+</zk>

@@ -1,0 +1,91 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/org/layout/memberLayout.zul"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+   
+    <window id="viewDiseaseIndex" border="none"
+            self="@{define(content)}" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('LeadingDiseasesDepartmentWiseModel') @init('com.patientadmission.presentation.LeadingDiseasesDepartmentWiseModel')">
+
+        <div style="border:1px solid #EEEEEE" align="center">
+            <n:h3 style="background-color: #EEEEEE;">
+            Leading Diseases Department wise
+            </n:h3>
+        <h:div id="searchBox">
+            <h:div id="searchBox_inner">
+                <div zclass="container-fluid">
+                    <h:div id="patient">
+                            
+                        <h:div id="admission_body">
+                            <div zclass="row-fluid">
+                            	<div sclass="span2">
+                                    <label value="Discharge Date From" style="font-weight:bold"/>
+                                    <datebox sclass="span12" value="@bind(LeadingDiseasesDepartmentWiseModel.dischargeDate)" format="dd/MM/yyyy"
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                                <div sclass="span2">
+                                    <label value="Discharge Date To" style="font-weight:bold"/>
+                                    <datebox sclass="span12" value="@bind(LeadingDiseasesDepartmentWiseModel.dischargeDateThru)" format="dd/MM/yyyy"
+                                             placeholder="dd/MM/yyyy"/>
+                                </div>
+                                 <div zclass="span3">
+				                    <label value="Admitted Department" style="font-weight:bold"/> 
+				                    <combobox   sclass="span12"  model="@bind(LeadingDiseasesDepartmentWiseModel.admittingDepartments)"  constraint="no empty"    readonly="true"
+				                              selectedItem="@load(LeadingDiseasesDepartmentWiseModel.selectedDepartment) @save(LeadingDiseasesDepartmentWiseModel.selectedDepartment,after='selectAdmittingDepartment')"
+				                              onSelect="@command('selectAdmittingDepartment')">
+				                              <template name="model" var="dept">
+						                            <comboitem  label="@load(dept.departmentName)"/>
+						                        </template>
+				                    </combobox>
+				                 </div>
+				                  <div sclass="span3">
+                                	 <label value="Criteria" style="font-weight:bold"/>
+	                                    <listbox id="criteriaListBox" mold="select" sclass="span12" onSelect="@command('criteria',content=self.getSelectedItem().getValue())">
+	                                        <listitem label="Top 10 Diseases" value="10" selected="true"/>
+	                                        <listitem label="Top 20 Diseases" value="20"/>
+	                                        <listitem label="Top 100 Diseases" value="100"/>
+	                                        <listitem label="All"  value="ALL" />
+	                                    </listbox>
+                                </div>
+                                
+                            </div>
+                        </h:div>
+                      
+                    </h:div>
+                </div>
+            </h:div>
+        </h:div>
+        <h:br/>
+        <div sclass="panelFoot">
+            <button label="Search" sclass="btn-success" onClick="@command('search')"/>
+            <button label="Reset" onClick="Executions.getCurrent().sendRedirect(null);" sclass="btn-danger"/>
+        </div>
+        <h:br/>
+        <h:br/>
+        <grid model="@load(LeadingDiseasesDepartmentWiseModel.maps)"
+				mold="paging" pageSize="10">
+				<columns>
+					<column label="Discharge Diagnosis Code" align="center" width="18%"></column>
+					<column label="Discharge Diagnosis Description" align="center"></column>
+					<column label="Department" align="center" width="15%"></column>
+					<column label="Total Number of cases" align="center" width="16%"></column>
+					<column label="Percentage of the Total" align="center" width="16%"></column>
+				</columns>
+				<template name="model" var="detail">
+					<row value="@bind(detail)">
+						<label value="@bind(detail.ICD_CODE)" />
+						<label value="@bind(detail.DESCRIPTION)" />
+						<label value="@bind(detail.DEPARTMENT_NAME)"/>
+						<label value="@bind(detail.CASECOUNT)" />
+						<label onCreate="@command('TotalPercentage',caseCount=detail.CASECOUNT,label=self)" />
+					</row>
+				</template>
+			</grid>
+	  </div>
+    </window>
+</zk>

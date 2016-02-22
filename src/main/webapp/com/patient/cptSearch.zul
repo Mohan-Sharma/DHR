@@ -1,0 +1,52 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <window id="cptWin" zclass="popup_container" border="none"
+                           apply="org.zkoss.bind.BindComposer" mode="modal" closable="true"  position="right,center"
+                           viewModel="@id('cptViewModel') @init('com.patientadmission.presentation.CptViewModel')">
+    <div zclass="modal" width="55%">
+        <div zclass="modal-header page-header">
+            <button zclass="close" onClick="cptWin.detach();">x</button>
+            <h:h5>Procedure Search</h:h5>
+        </div>
+            <div zclass="modal-body">
+                <div zclass="container-fluid">
+                    <div zclass="row-fluid">
+                        <div zclass="span4">
+                            <label value="Procedure Code"  sclass="boldLabel"/>
+                            <textbox value="@bind(cptViewModel.cptCode)" sclass="span12"/>
+                        </div>
+                        <div zclass="span8">
+                            <label value="Procedure Description" sclass="boldLabel"/>
+                            <textbox sclass="span12" value="@bind(cptViewModel.description)"/>
+                        </div>
+                    </div>
+                </div>
+                <div sclass="panelFoot">
+                    <button label="Search" onClick="@command('searchCpt')" sclass="btn-success"/>
+                </div>
+                <listbox id="cptElementListBox" model="@bind(cptViewModel.cptProcedures)"  mold="paging"
+                         pageSize="10" multiple="@bind(cptViewModel.multiSelect)" checkmark="@bind(cptViewModel.multiSelect)">
+                    <listhead>
+                        <listheader label="Code"  width="10%"/>
+                        <listheader label="Description"  width="90%"/>
+                    </listhead>
+                    <template name="model" var="cpt">
+                        <listitem onClick="@command('selectCpt',id=cpt.id)">
+                            <listcell label="@load(cpt.cptCode)"/>
+                            <listcell label="@load(cpt.description)"/>
+                        </listitem>
+                    </template>
+                </listbox>
+            </div>
+            <div sclass="panelFoot">
+                <button label="Add Procedures" sclass="btn-primary" onClick="@command('addSelectedCpts',listbox=cptElementListBox)"/>
+            </div>
+        </div>
+    </window>
+</zk>

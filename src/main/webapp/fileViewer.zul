@@ -1,0 +1,36 @@
+<zk xmlns="http://www.zkoss.org/2005/zul"
+	xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+	<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+	<zscript>
+	import org.zkoss.zk.ui.Executions;
+	String inPatientNumber = Executions.getCurrent().getParameter(
+			"inPatientNumber");
+</zscript>
+	<window id="viewDoctorWin" border="none" 
+		apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('fvm') @init('com.patientadmission.presentation.FileViewerModel', content=inPatientNumber)">
+		<div style="border:1px solid #EEEEEE">
+			<n:h3 style="background-color: #EEEEEE;">
+				<div style="position:absolute;left:800px">
+					<button id="downloadButton" disabled="false"
+						sclass="btn-primary" label="Download PDF"
+						onClick="@command('downloadDocument')" />
+					<vlayout>
+						<label id="errorLabel" visible="false"
+							style="color: #f00; font-size: 17px; font-weight: bold;" />
+					</vlayout>
+				</div>
+				<div>
+					<include src="/docviewer.jsp"
+						inPatientNumber="${inPatientNumber}" />
+				</div>
+				<separator />
+				<separator />
+			</n:h3>
+		</div>
+	</window>
+</zk>

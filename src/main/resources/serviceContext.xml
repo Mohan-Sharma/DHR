@@ -1,0 +1,15 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="basicTextEncryptor" class="org.jasypt.util.text.BasicTextEncryptor">
+        <property name="password">
+            <value>dhr</value>
+        </property>
+    </bean>
+
+    <bean id="documentDownloadServlet"
+          class=" com.patientadmission.application.handlers.servlets.DocumentDownloadServlet"/>
+
+</beans>

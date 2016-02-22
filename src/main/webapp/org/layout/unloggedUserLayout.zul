@@ -1,0 +1,85 @@
+<?meta name="viewport" content="width=device-width, initial-scale=1.0" ?>
+<?page title="Digital Health Records" contentType="text/html;charset=UTF-8"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <style>
+        /* Sticky footer styles
+        -------------------------------------------------- */
+
+        .row-fluid .span1 {
+            width: 1.98291%;
+        }
+
+        .z-spinner-real-readonly, .z-doublespinner-real-readonly, .z-timebox-real-readonly, .z-datebox-real-readonly, .z-bandbox-real-readonly, .z-combobox-real-readonly {
+            background-color: #FFFFFF;
+        }
+        .panelFoot {
+        /*border: 1px solid #C9D2D7;*/
+        padding: 4px 8px;
+        background-color:#F5F5F5;
+        text-align:center;
+        }
+
+        .boldLabel{
+        font-weight:bold;
+        }
+
+        .labelReq{
+        color:red;
+        }
+
+        #wrap {
+        min-height: 100%;
+        height: auto !important;
+        height: 100%;
+        /* Negative indent footer by it's height */
+        margin: 0 auto -60px;
+        }
+
+        /* Set the fixed height of the footer here */
+        #push,
+        #footer {
+        height: 60px;
+        }
+        #footer {
+        background-color: #f5f5f5;
+        }
+    </style>
+    <!-- <div sclass="top">
+        <include src="/org/layout/header.zul"/>
+    </div>-->
+    <!-- <div sclass="tabs clr">
+        <include src="/org/layout/menu.zul"/>
+    </div>-->
+    <h:div id="wrap">
+    <h:div class="container" style="display: block;margin-top:10px">
+            <h:div class="page-header">
+                <n:h1>
+                    <label id="pagetitle" style="font-size:14px;color:#008872;line-height:30px;font-weight:bold"/>
+                    <h:small>
+                        <label id="subpagetitle"/>
+                    </h:small>
+                </n:h1>
+            </h:div>
+            <n:h5 style="width:100%;text-align:center">
+                <label value="${requestScope.message}" id="successMsg"
+                       style="font-size:14px;color:#00AA00;line-height:40px;font-weight:bold"/>
+            </n:h5>
+            <div self="@{insert(content)}" id="center" sclass="mid" style="overflow:auto;"/>
+        <h:div id="push"></h:div>
+    </h:div>
+    </h:div>
+    <h:div id="footer">
+        <div zclass="container">
+            <h:p class="muted credit">Developed by NthDimenzion Solutions Pvt Ltd.</h:p>
+        </div>
+    </h:div>
+
+    <!--
+            <div self="@{insert(left)}" style="overflow:auto;"/>
+    -->
+
+</zk>

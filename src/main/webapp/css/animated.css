@@ -1,0 +1,173 @@
+
+.animated {
+    animation-duration: 1s;
+    animation-fill-mode: both;
+}
+.animated.hinge {
+    animation-duration: 2s;
+}
+.flash {
+    animation-name: flash;
+}
+.shake {
+    animation-name: shake;
+}
+.bounce {
+    animation-name: bounce;
+}
+.tada {
+    animation-name: tada;
+}
+.swing {
+    animation-name: swing;
+    transform-origin: center top 0;
+}
+.wobble {
+    animation-name: wobble;
+}
+.pulse {
+    animation-name: pulse;
+}
+.flip {
+    animation-name: flip;
+    backface-visibility: visible !important;
+}
+.flipInX {
+    animation-name: flipInX;
+    backface-visibility: visible !important;
+}
+.flipOutX {
+    animation-name: flipOutX;
+    backface-visibility: visible !important;
+}
+.flipInY {
+    animation-name: flipInY;
+    backface-visibility: visible !important;
+}
+.flipOutY {
+    animation-name: flipOutY;
+    backface-visibility: visible !important;
+}
+.fadeIn {
+    animation-name: fadeIn;
+}
+.fadeInUp {
+    animation-name: fadeInUp;
+}
+.fadeInDown {
+    animation-name: fadeInDown;
+}
+.fadeInLeft {
+    animation-name: fadeInLeft;
+}
+.fadeInRight {
+    animation-name: fadeInRight;
+}
+.fadeInUpBig {
+    animation-name: fadeInUpBig;
+}
+.fadeInDownBig {
+    animation-name: fadeInDownBig;
+}
+.fadeInLeftBig {
+    animation-name: fadeInLeftBig;
+}
+.fadeInRightBig {
+    animation-name: fadeInRightBig;
+}
+.fadeOut {
+    animation-name: fadeOut;
+}
+.fadeOutUp {
+    animation-name: fadeOutUp;
+}
+.fadeOutDown {
+    animation-name: fadeOutDown;
+}
+.fadeOutLeft {
+    animation-name: fadeOutLeft;
+}
+.fadeOutRight {
+    animation-name: fadeOutRight;
+}
+.fadeOutUpBig {
+    animation-name: fadeOutUpBig;
+}
+.fadeOutDownBig {
+    animation-name: fadeOutDownBig;
+}
+.fadeOutLeftBig {
+    animation-name: fadeOutLeftBig;
+}
+.fadeOutRightBig {
+    animation-name: fadeOutRightBig;
+}
+.bounceIn {
+    animation-name: bounceIn;
+}
+.bounceInUp {
+    animation-name: bounceInUp;
+}
+.bounceInDown {
+    animation-name: bounceInDown;
+}
+.bounceInLeft {
+    animation-name: bounceInLeft;
+}
+.bounceInRight {
+    animation-name: bounceInRight;
+}
+.bounceOut {
+    animation-name: bounceOut;
+}
+.bounceOutUp {
+    animation-name: bounceOutUp;
+}
+.bounceOutDown {
+    animation-name: bounceOutDown;
+}
+.bounceOutLeft {
+    animation-name: bounceOutLeft;
+}
+.bounceOutRight {
+    animation-name: bounceOutRight;
+}
+.rotateIn {
+    animation-name: rotateIn;
+}
+.rotateInUpLeft {
+    animation-name: rotateInUpLeft;
+}
+.rotateInDownLeft {
+    animation-name: rotateInDownLeft;
+}
+.rotateInUpRight {
+    animation-name: rotateInUpRight;
+}
+.rotateInDownRight {
+    animation-name: rotateInDownRight;
+}
+.rotateOut {
+    animation-name: rotateOut;
+}
+.rotateOutUpLeft {
+    animation-name: rotateOutUpLeft;
+}
+.rotateOutDownLeft {
+    animation-name: rotateOutDownLeft;
+}
+.rotateOutUpRight {
+    animation-name: rotateOutUpRight;
+}
+.rotateOutDownRight {
+    animation-name: rotateOutDownRight;
+}
+.hinge {
+    animation-name: hinge;
+}
+.rollIn {
+    animation-name: rollIn;
+}
+.rollOut {
+    animation-name: rollOut;
+}

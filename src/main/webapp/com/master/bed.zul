@@ -1,0 +1,41 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+    <zscript><![CDATA[
+import org.nthdimenzion.presentation.infrastructure.Navigation;
+import org.zkoss.zkplus.spring.SpringUtil;
+import org.zkoss.zk.ui.Component;
+import org.nthdimenzion.object.utils.Constants;
+Component comp = arg.get("targetComp");
+]]></zscript>
+    <window id="masterDataCreate" zclass="popup_container" border="none"
+            apply="org.zkoss.bind.BindComposer" mode="modal" closable="true"  width="200px"  position="right,center"
+            viewModel="@id('masterViewModel') @init('com.master.presentation.viewmodel.MasterViewModel')">
+        <div zclass="modal" height="180px" width="300px">
+            <div zclass="modal-header page-header">
+                <button zclass="close btn-mini" onClick="masterDataCreate.detach();">x</button>
+                <h:h5>New Bed</h:h5>
+            </div>
+            <div zclass="modal-body">
+                <div zclass="container-fluid">
+                    <div zclass="row-fluid">
+                        <div zclass="span4">
+                            <label  sclass="name" value="Bed No" mold="required"/>
+                            <textbox sclass="span12" id="txtEnumCode"  placeholder=""
+                                     value="@bind(masterViewModel.bed.name)"
+                                     constraint="no empty"/>
+                        </div>
+                    </div>
+                    <div sclass="panelFoot">
+                        <button id="createMasterDataBtn" sclass="btn-primary" label="Save" onClick="@command('createBed',targetComp=comp)"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </window>
+
+
+</zk>
