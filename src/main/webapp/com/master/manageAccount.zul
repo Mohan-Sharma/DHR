@@ -30,7 +30,7 @@
             <tabpanels>
                 <tabpanel>
                     <window id="manageDemographicDetails">
-                        <caption label="View Doctors Demographic Details"/>
+                        <caption label="View Demographic Details"/>
                         <grid>
                             <rows>
                                 <row>
@@ -116,9 +116,9 @@
                                     <caption label="Change PDF Access Password"/>
                                     <grid vflex="1">
                                         <rows>
-                                            <row>
-                                                <cell width="20%">New Password<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox type="password" width="48%" id="oldPassword" value="@save(vm.modelMap.oldPassword, before='updateAdditionalPassword')" constraint="no empty:Required"/></cell>
-                                            </row>
+                                            <!--<row>
+                                                <cell width="20%">Current Password<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox type="password" width="48%" id="oldPassword" value="@save(vm.modelMap.oldPassword, before='updateAdditionalPassword')" constraint="no empty:Required"/></cell>
+                                            </row>-->
                                             <row>
                                                 <cell width="20%">New Password<label value="*" style="color: #ff0000"/> :</cell> <cell width="30%" ><textbox type="password" width="48%" id="newPassword" value="@save(vm.modelMap.newPassword, before='updateAdditionalPassword')" constraint="no empty:Required"/></cell>
                                             </row>

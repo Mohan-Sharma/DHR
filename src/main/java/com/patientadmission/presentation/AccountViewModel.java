@@ -51,7 +51,7 @@ public class AccountViewModel extends AbstractZKModel {
         allUsers = patientAdmissionFinder.findAllUsers();
         newUser = createMapWithGivenKeys("userName", "defaultPassword");
         newUser.put("defaultPassword", PatientAdmissionConstants.DEFAULT_PASSWORD);
-        roles = new ArrayList<String>(Arrays.asList("ADMIN", "DATAOP", "USER_CREATER"));
+        roles = new ArrayList<String>(Arrays.asList("ADMIN", "DATAOP", "USER_CREATER", "DOCTOR"));
     }
 
     @NotifyChange("users")
@@ -80,6 +80,10 @@ public class AccountViewModel extends AbstractZKModel {
     public void changeRole(@BindingParam("user") Map user) {
         if (selectedRole != null) {
             String role = selectedRole.substring(1, selectedRole.length() - 1);
+            if (role.equals("DOCTOR")){
+                displayMessages.displayError("Role can not be changed to Doctor");
+                return;
+            }
             userService.changeRole((String) user.get("userName"), role);
             displayMessages.displaySuccess();
         } else {
@@ -87,13 +91,17 @@ public class AccountViewModel extends AbstractZKModel {
         }
     }
 
+    /*@Command
+    public void checkRole(@BindingParam("user") Map user) {
+
+    }*/
+
     @Command
     public void checkSelectedDepartments(@BindingParam("listItem") Listitem listitem, @BindingParam("user") Map user){
         UserLogin userLogin = userService.loadUserLoginByUserName(user.get("userName").toString());
         if(userLogin.getRole().equals(listitem.getLabel().toString())){
             listitem.setSelected(true);
         }
-        System.out.print("hi");
     }
 
     public List<Map<String, ?>> getDoctors() {
@@ -126,5 +134,12 @@ public class AccountViewModel extends AbstractZKModel {
 
     public void setSelectedRole(String selectedRole) {
         this.selectedRole = selectedRole;
+    }
+    public boolean checkRole(Map user){
+        UserLogin userLogin = userService.loadUserLoginByUserName(user.get("userName").toString());
+        if(userLogin.getRole().equals("DOCTOR")){
+            return true;
+        }
+        return false;
     }
 }

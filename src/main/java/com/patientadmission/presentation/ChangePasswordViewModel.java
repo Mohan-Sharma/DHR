@@ -46,7 +46,7 @@ public class ChangePasswordViewModel extends AbstractZKModel {
             return;
         }
         userService.changePassword(loggedInUser.getUsername(), password);
-        Doctor doctor = userLoginRepository.findUserLoginWithUserName(loggedInUser.getUsername()).getDoctor();
+        /*Doctor doctor = userLoginRepository.findUserLoginWithUserName(loggedInUser.getUsername()).getDoctor();
         if (doctor != null){
             doctor.setAdditionalPassword((String) userLoginDetails.get("additionalPassword"));
             crudDao.save(doctor);
@@ -54,7 +54,7 @@ public class ChangePasswordViewModel extends AbstractZKModel {
             User user = userLoginRepository.findUserLoginWithUserName(loggedInUser.getUsername()).getUser();
             user.setAdditionalPassword((String) userLoginDetails.get("additionalPassword"));
             crudDao.save(user);
-        }
+        }*/
 
         navigation.redirect("login", ImmutableMap.of("resetPassword","1"));
     }

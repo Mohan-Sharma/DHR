@@ -166,7 +166,8 @@ public class ManageDoctorAccountVm extends AbstractZKModel{
     @NotifyChange({"doctor","displayMessages","modelMap"})
     public void updateAdditionalPassword(){
         displayMessages.clearMessage();
-        boolean result = validateCredentialsBeforeUpdating();
+        //boolean result = validateCredentialsBeforeUpdating();
+        boolean result = (modelMap.get("newPassword").toString()).equals(modelMap.get("confirmPassword").toString());
         if(result){
             try {
                 if (userLogin.getRole().equals("DOCTOR")) {
@@ -190,6 +191,9 @@ public class ManageDoctorAccountVm extends AbstractZKModel{
                 displayMessages.displayError("Error occured cannot update...");
                 e.printStackTrace();
             }
+        } else {
+            displayMessages.displayError("New Password and Confirm Password Not Matching...");
+            return;
         }
     }
 

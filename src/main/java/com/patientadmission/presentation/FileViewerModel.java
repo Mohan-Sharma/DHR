@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import com.patientadmission.domain.User;
 import org.nthdimenzion.crud.ICrud;
 import org.nthdimenzion.object.utils.UtilValidator;
 import org.nthdimenzion.presentation.annotations.Composer;
 import org.nthdimenzion.presentation.infrastructure.AbstractZKModel;
 import org.nthdimenzion.security.domain.IUserLoginRepository;
 import org.nthdimenzion.security.domain.IsADoctor;
+import org.nthdimenzion.security.domain.UserLogin;
 import org.zkoss.bind.annotation.AfterCompose;
 import org.zkoss.bind.annotation.BindingParam;
 import org.zkoss.bind.annotation.Command;
@@ -41,6 +43,7 @@ public class FileViewerModel extends AbstractZKModel{
 	private IUserLoginRepository userLoginRepository;
 
 	private IsADoctor isADoctor;
+	private UserLogin userLogin;
 	private String filePath;
 	private String contentType;
 	private String inPatientNumber;
@@ -58,14 +61,15 @@ public class FileViewerModel extends AbstractZKModel{
 	@AfterCompose
 	public void init(@ContextParam(ContextType.VIEW) Component view, @BindingParam("content") String inPatientNumber) {
 		Selectors.wireComponents(view, this, true);
-		isADoctor = userLoginRepository.findUserLoginWithUserName(loggedInUser.getUsername());
+		//isADoctor = userLoginRepository.findUserLoginWithUserName(loggedInUser.getUsername());
+		userLogin = userLoginRepository.findUserLoginWithUserName(loggedInUser.getUsername());
 		Map<String, ?> map = patientAdmissionFinder.findFileNameBy(inPatientNumber);
 		this.inPatientNumber = inPatientNumber;
 		filePath = (String) map.get("FILE_PATH");
 		contentType = (String) map.get("CONTENT_TYPE");
 		if (filePath == null)
 		{	
-			errorLabel.setValue("Case Sheet Not Attatched! Contact Administrator");
+			errorLabel.setValue("Case Sheet Not Attatched! Contact Medical Records Department");
 			errorLabel.setVisible(true);
 		}
 
@@ -95,14 +99,22 @@ public class FileViewerModel extends AbstractZKModel{
 	@Command
 	public void downloadDocument() throws IOException {
 
-		Doctor doctor = crudDao.find(Doctor.class,isADoctor.getDoctorId());
+		/*Doctor doctor = crudDao.find(Doctor.class,isADoctor.getDoctorId());*/
+		String additionalPassword = null;
+		if (userLogin.getRole().equals("DOCTOR")){
+			Doctor doctor = crudDao.find(Doctor.class, userLogin.getDoctor().getId());
+			additionalPassword = doctor.getAdditionalPassword();
+		} else if (userLogin.getRole().equals("ADMIN")){
+			User user = crudDao.find(User.class, userLogin.getUser().getId());
+			additionalPassword = user.getAdditionalPassword();
+		}
 		try {
-			DocumentViewHelper.downloadPdf(filePath,contentType,doctor.getAdditionalPassword());
+			DocumentViewHelper.downloadPdf(filePath,contentType,additionalPassword);
 			// DocumentViewHelper.openDocumentInNewWindow(navigation,inPatientNumber);
 
 		} catch (Exception e) {
 			logger.error("Could not download case sheet for " + inPatientNumber,e);
-			errorLabel.setValue("Cannot Download Case Sheet! Contact Administrator");
+			errorLabel.setValue("Cannot Download Case Sheet! Contact Medical Records Department");
 			errorLabel.setVisible(true);
 		}
 	}

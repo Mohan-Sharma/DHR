@@ -80,6 +80,8 @@ public class UserService implements UserDetailsService {
             userLogin.setHomepageViewId("registerPatient");
         } else if (role.equals("USER_CREATER")) {
             userLogin.setHomepageViewId("createUser");
+        } else if (role.equals("DOCTOR")) {
+            userLogin.setHomepageViewId("viewDemography");
         }
         crudDao.save(userLogin);
     }

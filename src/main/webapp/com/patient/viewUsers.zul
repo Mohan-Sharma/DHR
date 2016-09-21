@@ -50,7 +50,15 @@
 							</listbox>
 						</cell>
 						<button label="Change Role"
-								onClick="@command('changeRole',user=self.getParent().getValue())" sclass="btn-danger"></button>
+								onClick="@command('changeRole',user=self.getParent().getValue())" sclass="btn-danger">
+							<attribute name="onCreate">
+
+								Boolean isDoctor = CreateAccountViewModel.checkRole(self.getParent().getValue());
+								if (isDoctor){
+								self.setDisabled(true);
+								}
+							</attribute>
+						</button>
 					</row>
 				</template>
 			

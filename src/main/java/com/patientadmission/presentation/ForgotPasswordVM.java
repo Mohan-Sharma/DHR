@@ -102,6 +102,10 @@ public class ForgotPasswordVM extends AbstractZKModel{
             answer = null;
             return false;
         }
+        if(userLogin.getSecurityQuestion() == null){
+            displayMessages.displayError("You have not set any security Question. Please contact administrator to reset your password.");
+            return false;
+        }
         String loggedInUserSecurityQuestion = userLogin.getSecurityQuestionForLoggedInUser();
         String loggedInUserSecurityAnswer= userLogin.getSecurityAnswerForLoggedInUser();
         if(userLogin == null){

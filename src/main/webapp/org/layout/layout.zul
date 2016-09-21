@@ -85,6 +85,9 @@
                         <h:li class="active dropdown" style="margin-left:5px">
                             <a label="View All Doctors" onClick='navigation.redirect("viewDoctors")'/>
                         </h:li>-->
+                        <h:li class="active">
+                            <a id="export" label="Export" onClick='navigation.redirect("export")'/>
+                        </h:li>
                         <h:li class="active dropdown" style="margin-left:5px">
                             <a label="Logout" href="/resources/j_spring_security_logout"/>
                         </h:li>
